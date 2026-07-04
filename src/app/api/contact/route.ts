@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     // Validar con Zod
     const parsed = contactFormSchema.safeParse(body);
     if (!parsed.success) {
-      return errorResponse("Datos inválidos: " + JSON.stringify(parsed.error.errors), 400);
+      return errorResponse("Datos inválidos: " + JSON.stringify(parsed.error.issues), 400);
     }
 
     // Guardar en BD

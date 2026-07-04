@@ -14,20 +14,13 @@ export const contactFormSchema = z.object({
     .max(100, "Empresa no puede exceder 100 caracteres")
     .optional()
     .or(z.literal("")),
-  serviceType: z.enum(
-    ["vulnerability-analysis", "audit", "consulting", "ai-agents"],
-    {
-      errorMap: () => ({ message: "Tipo de servicio inválido" }),
-    }
-  ),
+  serviceType: z.enum(["vulnerability-analysis", "audit", "consulting", "ai-agents"]),
   message: z
     .string()
     .min(10, "El mensaje debe tener al menos 10 caracteres")
     .max(5000, "El mensaje no puede exceder 5000 caracteres"),
   budgetRange: z
-    .enum(["5k-10k", "10k-25k", "25k+", "otro"], {
-      errorMap: () => ({ message: "Rango de presupuesto inválido" }),
-    })
+    .enum(["5k-10k", "10k-25k", "25k+", "otro"])
     .optional()
     .or(z.literal("")),
   honeypot: z

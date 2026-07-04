@@ -50,7 +50,7 @@ export const Contact = () => {
     const result = contactFormSchema.safeParse(formData);
     if (!result.success) {
       const newErrors: FormErrors = {};
-      result.error.errors.forEach((err) => {
+      result.error.issues.forEach((err) => {
         const fieldName = err.path.join(".");
         newErrors[fieldName] = err.message;
       });

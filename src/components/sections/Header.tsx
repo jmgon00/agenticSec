@@ -18,7 +18,7 @@ export const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="text-white font-bold text-xl">
+          <Link href="/" className="text-white hover:text-cyan-400 font-bold text-xl transition-colors duration-200">
             JMG
           </Link>
 
@@ -28,7 +28,7 @@ export const Header = () => {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-gray-300 hover:text-white transition-colors"
+                className="text-gray-300 hover:text-cyan-400 transition-colors duration-200"
               >
                 {link.label}
               </Link>
@@ -37,7 +37,7 @@ export const Header = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-white"
+            className="md:hidden text-white hover:text-cyan-400 transition-colors duration-200"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +53,7 @@ export const Header = () => {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-gray-300 hover:text-white px-2 py-2 rounded transition-colors"
+                className="text-gray-300 hover:text-cyan-400 px-2 py-2 rounded transition-colors duration-200"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}

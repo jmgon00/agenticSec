@@ -2,9 +2,12 @@
 
 :root {
   --foreground: #ffffff;
-  --background: #0f172a;
-  --primary: #3b82f6;
-  --primary-dark: #1e40af;
+  --background: #0a0e27;
+  --primary: #00D9FF;
+  --primary-dark: #00B8CC;
+  --secondary: #FF006E;
+  --secondary-light: #FF4D8D;
+  --accent: #00F5FF;
   --gray-50: #f9fafb;
   --gray-100: #f3f4f6;
   --gray-200: #e5e7eb;
@@ -44,6 +47,11 @@ h1, h2, h3, h4, h5, h6 {
 a {
   text-decoration: none;
   color: var(--primary);
+  transition: color 200ms ease-in-out;
+}
+
+a:hover {
+  color: var(--accent);
 }
 
 button {
@@ -72,11 +80,93 @@ button {
 /* Selección de texto */
 ::selection {
   background-color: var(--primary);
-  color: white;
+  color: var(--background);
 }
 
 /* Focus visible para accesibilidad */
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes textGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(17, 24, 39, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 217, 255, 0.2);
+}
+
+.glass-xl {
+  background: rgba(17, 24, 39, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 217, 255, 0.2);
+}
+
+/* Glow effects */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4),
+              inset 0 0 20px rgba(0, 217, 255, 0.1);
+}
+
+.glow-magenta {
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.4),
+              inset 0 0 20px rgba(255, 0, 110, 0.1);
 }

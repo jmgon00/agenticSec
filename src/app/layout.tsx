@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SITE_CONFIG } from "@/content/config";
+import { Header } from "@/components/sections/Header";
+import { Footer } from "@/components/sections/Footer";
 
 export const metadata: Metadata = {
   title: SITE_CONFIG.title,
@@ -26,7 +28,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="bg-gray-900 text-white">{children}</body>
+      <body className="bg-gray-900 text-white">
+        <Header />
+        <main className="pt-16">{children}</main>
+        <Footer />
+      </body>
     </html>
   );
 }

@@ -95,7 +95,7 @@ export const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-gray-900 px-4">
+    <section id="contact" className="py-20 bg-gradient-to-b from-gray-900 to-dark-base px-4">
       <div className="max-w-2xl mx-auto">
         <h2 className="text-4xl font-bold text-white mb-12 text-center">
           Solicitar Presupuesto
@@ -173,7 +173,7 @@ export const Contact = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Descripción del Proyecto <span className="text-red-500">*</span>
+              Descripción del Proyecto <span className="text-magenta-400">*</span>
             </label>
             <textarea
               name="message"
@@ -182,10 +182,10 @@ export const Contact = () => {
               placeholder="Cuéntanos sobre tu proyecto..."
               required
               rows={5}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-2 bg-gray-900/30 border border-gray-800 rounded-lg text-white placeholder-gray-500 backdrop-blur-sm focus:outline-none focus:border-cyan-400 focus:shadow-glow-cyan transition-all duration-200"
             />
             {errors.message && (
-              <p className="text-red-500 text-sm mt-1">{errors.message}</p>
+              <p className="text-magenta-400 text-sm mt-1">{errors.message}</p>
             )}
           </div>
 

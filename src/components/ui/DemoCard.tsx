@@ -6,8 +6,8 @@ interface DemoCardProps {
 
 export const DemoCard = ({ title, description, embedUrl }: DemoCardProps) => {
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden hover:border-blue-500 transition-all duration-200">
-      <div className="bg-gray-700 h-64 flex items-center justify-center">
+    <div className="bg-gray-900/50 backdrop-blur-lg border border-gray-800 rounded-lg overflow-hidden hover:border-cyan-400 hover:shadow-cyan-lg transition-all duration-200 ease-out">
+      <div className="bg-gray-800 h-64 flex items-center justify-center">
         <iframe
           src={embedUrl}
           title={title}

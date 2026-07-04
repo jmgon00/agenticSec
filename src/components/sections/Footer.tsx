@@ -12,7 +12,7 @@ export const Footer = () => {
             <h3 className="text-white font-bold mb-4">Contacto</h3>
             <a
               href={`mailto:${SITE_CONFIG.email}`}
-              className="text-gray-400 hover:text-blue-500 transition-colors"
+              className="text-gray-400 hover:text-cyan-400 transition-colors"
             >
               {SITE_CONFIG.email}
             </a>
@@ -26,7 +26,7 @@ export const Footer = () => {
                 href={SITE_CONFIG.social.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-500 transition-colors"
+                className="text-gray-400 hover:text-cyan-400 transition-colors"
               >
                 LinkedIn
               </a>
@@ -34,7 +34,7 @@ export const Footer = () => {
                 href={SITE_CONFIG.social.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-500 transition-colors"
+                className="text-gray-400 hover:text-cyan-400 transition-colors"
               >
                 GitHub
               </a>

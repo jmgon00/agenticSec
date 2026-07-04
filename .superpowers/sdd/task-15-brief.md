@@ -1,3 +1,21 @@
+# Task 15: Update Landing Page with CTAs
+
+**Files:**
+- Modify: `src/app/page.tsx`
+
+**Interfaces:**
+- Consumes: Existing sections + new CTA buttons
+- Produces: Links to `/portfolio`, `/presupuesto`, `/agentic-ia`
+
+**Dependencies:**
+- Uses `<Button />` from `src/components/ui/Button`
+- Uses `Link` from `next/link`
+
+## Step 1: Update landing page
+
+Modify `src/app/page.tsx`:
+
+```typescript
 import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
 import { Services } from "@/components/sections/Services";
@@ -13,17 +31,17 @@ export default function Home() {
       <Hero />
       <About />
       <Services />
-
+      
       {/* CTA Section to Sub-Pages */}
-      <section className="py-20 bg-gradient-to-b from-gray-900 to-dark-base px-4">
+      <section className="py-20 bg-gray-900 px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-white text-center mb-12">
             Explora más
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Link href="/portfolio" className="group">
-              <div className="p-8 bg-gray-900/50 backdrop-blur-lg rounded-lg border border-gray-800 hover:border-cyan-400 hover:shadow-cyan-lg transition-all text-center">
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
+              <div className="p-8 bg-gray-800 rounded-lg border border-gray-700 hover:border-blue-500 transition-all text-center">
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400">
                   Portfolio
                 </h3>
                 <p className="text-gray-300 mb-4">
@@ -34,8 +52,8 @@ export default function Home() {
             </Link>
 
             <Link href="/presupuesto" className="group">
-              <div className="p-8 bg-gray-900/50 backdrop-blur-lg rounded-lg border border-gray-800 hover:border-cyan-400 hover:shadow-cyan-lg transition-all text-center">
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
+              <div className="p-8 bg-gray-800 rounded-lg border border-gray-700 hover:border-blue-500 transition-all text-center">
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400">
                   Presupuesto
                 </h3>
                 <p className="text-gray-300 mb-4">
@@ -46,8 +64,8 @@ export default function Home() {
             </Link>
 
             <Link href="/agentic-ia" className="group">
-              <div className="p-8 bg-gray-900/50 backdrop-blur-lg rounded-lg border border-gray-800 hover:border-cyan-400 hover:shadow-cyan-lg transition-all text-center">
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
+              <div className="p-8 bg-gray-800 rounded-lg border border-gray-700 hover:border-blue-500 transition-all text-center">
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400">
                   Agentic IA
                 </h3>
                 <p className="text-gray-300 mb-4">
@@ -62,7 +80,14 @@ export default function Home() {
 
       <Demos />
       <Contact />
-      <Footer />
     </main>
   );
 }
+```
+
+## Step 2: Commit
+
+```bash
+git add src/app/page.tsx
+git commit -m "feat: add CTA section to landing page linking to sub-pages"
+```

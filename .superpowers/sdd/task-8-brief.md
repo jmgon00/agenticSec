@@ -1,3 +1,21 @@
+# Task 8: Create CaseStudyModal Component
+
+**Files:**
+- Create: `src/components/sections/CaseStudyModal.tsx`
+
+**Interfaces:**
+- Consumes: `caseStudy: CaseStudy | null`, `onClose: () => void` (props)
+- Produces: `<CaseStudyModal caseStudy={...} onClose={func} />` component
+
+**Dependencies:**
+- Imports from `src/content/portfolio` the `CaseStudy` interface
+- Uses `<Modal />` from `src/components/ui/Modal`
+
+## Step 1: Create CaseStudyModal component
+
+Create `src/components/sections/CaseStudyModal.tsx`:
+
+```typescript
 "use client";
 
 import { CaseStudy } from "@/content/portfolio";
@@ -23,27 +41,27 @@ export const CaseStudyModal = ({ caseStudy, onClose }: CaseStudyModalProps) => {
         )}
 
         <div>
-          <h3 className="text-lg font-semibold text-cyan-400 mb-2">Problema</h3>
+          <h3 className="text-lg font-semibold text-blue-400 mb-2">Problema</h3>
           <p className="text-gray-300">{caseStudy.problem}</p>
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold text-cyan-400 mb-2">Solución</h3>
+          <h3 className="text-lg font-semibold text-blue-400 mb-2">Solución</h3>
           <p className="text-gray-300">{caseStudy.solution}</p>
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold text-cyan-400 mb-2">Resultados</h3>
+          <h3 className="text-lg font-semibold text-blue-400 mb-2">Resultados</h3>
           <p className="text-gray-300">{caseStudy.results}</p>
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold text-cyan-400 mb-2">Tecnologías</h3>
+          <h3 className="text-lg font-semibold text-blue-400 mb-2">Tecnologías</h3>
           <div className="flex flex-wrap gap-2">
             {caseStudy.technologies.map((tech) => (
               <span
                 key={tech}
-                className="px-3 py-1 bg-gray-900/50 border border-cyan-400/20 text-cyan-300 rounded-full text-sm backdrop-blur-sm"
+                className="px-3 py-1 bg-gray-800 text-gray-300 rounded-full text-sm"
               >
                 {tech}
               </span>
@@ -53,12 +71,12 @@ export const CaseStudyModal = ({ caseStudy, onClose }: CaseStudyModalProps) => {
 
         {caseStudy.video && (
           <div>
-            <h3 className="text-lg font-semibold text-cyan-400 mb-2">Video</h3>
+            <h3 className="text-lg font-semibold text-blue-400 mb-2">Video</h3>
             <a
               href={caseStudy.video}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-cyan-400 hover:text-cyan-300 underline transition-colors"
+              className="text-blue-400 hover:text-blue-300 underline"
             >
               Ver video →
             </a>
@@ -68,3 +86,11 @@ export const CaseStudyModal = ({ caseStudy, onClose }: CaseStudyModalProps) => {
     </Modal>
   );
 };
+```
+
+## Step 2: Commit
+
+```bash
+git add src/components/sections/CaseStudyModal.tsx
+git commit -m "feat: add CaseStudyModal component for detailed case views"
+```

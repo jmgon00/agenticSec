@@ -3,7 +3,7 @@ import { ServiceCard } from "@/components/ui/ServiceCard";
 
 export const Services = () => {
   return (
-    <section className="py-20 bg-gray-900 px-4">
+    <section className="py-20 bg-gradient-to-b from-gray-900 to-dark-base px-4">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl font-bold text-white mb-12 text-center">
           Servicios

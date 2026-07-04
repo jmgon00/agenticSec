@@ -1,0 +1,13 @@
+
+> interactiv3web@0.1.0 dev
+> next dev
+
+⚠ Port 3000 is in use by process 57932, using available port 3002 instead.
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3002
+- Network:       http://192.168.1.48:3002
+- Environments: .env.local, .env
+✓ Ready in 605ms
+
+⚠ Slow filesystem detected. The benchmark took 607ms. If E:\Cloude projects\interactiv3Web\.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development

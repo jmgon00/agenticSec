@@ -24,7 +24,7 @@ export const Select = ({
       {label && (
         <label className="block text-sm font-medium text-gray-300 mb-2">
           {label}
-          {required && <span className="text-red-500">*</span>}
+          {required && <span className="text-magenta-400">*</span>}
         </label>
       )}
       <select
@@ -32,7 +32,9 @@ export const Select = ({
         value={value}
         onChange={onChange}
         required={required}
-        className={`w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500 ${className}`}
+        className={`w-full px-4 py-2 bg-gray-900/30 border border-gray-800 rounded-lg text-white backdrop-blur-sm transition-all duration-200 focus:outline-none focus:border-cyan-400 focus:shadow-glow-cyan ${
+          error ? "border-magenta-400" : ""
+        } ${className}`}
       >
         <option value="">Selecciona una opción</option>
         {options.map((opt) => (
@@ -41,7 +43,7 @@ export const Select = ({
           </option>
         ))}
       </select>
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      {error && <p className="text-magenta-400 text-sm mt-1">{error}</p>}
     </div>
   );
 };

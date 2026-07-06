@@ -4,9 +4,9 @@ import { HERO } from "@/content/config";
 import { Button } from "@/components/ui/Button";
 
 export const Hero = () => {
-  const scrollToContact = () => {
-    const contactSection = document.getElementById("contact");
-    contactSection?.scrollIntoView({ behavior: "smooth" });
+  const scrollToAgenticIA = () => {
+    const section = document.getElementById("agentic-ia");
+    section?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -26,7 +26,7 @@ export const Hero = () => {
         <p className="text-lg md:text-xl text-gray-300 mb-8 font-light">
           {HERO.subtitle}
         </p>
-        <Button size="lg" onClick={scrollToContact}>
+        <Button size="lg" onClick={scrollToAgenticIA}>
           {HERO.cta}
         </Button>
       </div>

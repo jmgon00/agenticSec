@@ -28,6 +28,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
+      <head>
+        <style dangerouslySetInnerHTML={{__html: `
+          html, body { margin: 0; padding: 0; }
+          body { background-color: #0a0e27; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+          * { box-sizing: border-box; }
+        `}} />
+      </head>
       <body className="bg-gray-900 text-white">
         <Header />
         <main className="pt-16">{children}</main>

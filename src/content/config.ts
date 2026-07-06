@@ -11,9 +11,9 @@ export const SITE_CONFIG = {
 };
 
 export const HERO = {
-  title: "Seguridad sin compromiso",
-  subtitle: "Análisis de vulnerabilidades, auditorías y automatización inteligente",
-  cta: "Solicitar presupuesto",
+  title: "Interactiv3Web",
+  subtitle: "Seguridad con Inteligencia Artificial",
+  cta: "Descubre cómo",
 };
 
 export const ABOUT = {

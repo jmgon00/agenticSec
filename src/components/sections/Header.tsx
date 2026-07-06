@@ -11,6 +11,7 @@ export const Header = () => {
     { href: "/portfolio", label: "Portfolio" },
     { href: "/presupuesto", label: "Presupuesto" },
     { href: "/agentic-ia", label: "Agentic IA" },
+    { href: "/security-services", label: "Servicios de Seguridad" },
   ];
 
   return (

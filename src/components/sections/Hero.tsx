@@ -20,7 +20,7 @@ export const Hero = () => {
       </div>
 
       <div className="text-center max-w-3xl relative z-10">
-        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 bg-gradient-to-r from-cyan-400 via-magenta-400 to-cyan-400 bg-clip-text text-transparent animate-textGradient bg-[length:200%_auto]">
+        <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-cyan-400 via-magenta-400 to-cyan-400 bg-clip-text text-transparent animate-textGradient bg-[length:200%_auto]">
           {HERO.title}
         </h1>
         <p className="text-lg md:text-xl text-gray-300 mb-8 font-light">

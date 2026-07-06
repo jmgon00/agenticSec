@@ -3,7 +3,7 @@ import { BudgetForm } from "@/components/sections/BudgetForm";
 
 export default function PresupuestoPage() {
   return (
-    <main>
+    <>
       <PageHeader
         title="Solicitar Presupuesto"
         subtitle="Cuéntanos sobre tu proyecto y recibirás un presupuesto personalizado"
@@ -13,6 +13,6 @@ export default function PresupuestoPage() {
           <BudgetForm />
         </div>
       </section>
-    </main>
+    </>
   );
 }

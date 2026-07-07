@@ -20,7 +20,7 @@ export const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="text-white hover:text-cyan-400 font-bold text-xl transition-colors duration-200">
-            JMG
+            AgenticSec
           </Link>
 
           {/* Desktop Navigation */}

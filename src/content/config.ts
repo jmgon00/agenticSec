@@ -1,5 +1,5 @@
 export const SITE_CONFIG = {
-  title: "Juan Mago González - Analista de Seguridad",
+  title: "AgenticSec - Analista de Seguridad",
   description:
     "Servicios profesionales de análisis de vulnerabilidades, auditorías y automatización con agentes de IA",
   author: "Juan Mago González",
@@ -11,7 +11,7 @@ export const SITE_CONFIG = {
 };
 
 export const HERO = {
-  title: "Interactiv3Web",
+  title: "AgenticSec",
   subtitle: "Seguridad con Inteligencia Artificial",
   cta: "Descubre cómo",
 };

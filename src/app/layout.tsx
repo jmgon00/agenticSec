@@ -5,19 +5,19 @@ import { Header } from "@/components/sections/Header";
 import { Footer } from "@/components/sections/Footer";
 
 export const metadata: Metadata = {
-  title: SITE_CONFIG.title,
-  description: SITE_CONFIG.description,
-  authors: [{ name: SITE_CONFIG.author }],
+  title: "AgenticSec - Análisis de Seguridad & Automatización IA",
+  description: "Servicios profesionales de análisis de vulnerabilidades, auditorías y automatización con agentes de IA",
+  authors: [{ name: "Juan Mago González", url: "https://agenticsec.vercel.app" }],
   openGraph: {
-    title: SITE_CONFIG.title,
-    description: SITE_CONFIG.description,
+    title: "AgenticSec",
+    description: "Análisis de vulnerabilidades, auditorías y automatización inteligente",
     type: "website",
     url: process.env.NEXT_PUBLIC_SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: SITE_CONFIG.title,
-    description: SITE_CONFIG.description,
+    title: "AgenticSec",
+    description: "Análisis de vulnerabilidades, auditorías y automatización inteligente",
   },
 };
 

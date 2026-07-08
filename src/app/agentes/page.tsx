@@ -99,7 +99,7 @@ export default function AgentesPage() {
                   <img
                     src={screenshots[currentImageIndex].src}
                     alt={screenshots[currentImageIndex].label}
-                    className="w-full h-auto max-h-96 object-cover"
+                    className="w-full h-auto max-h-96 object-contain bg-gray-900"
                   />
 
                   {/* Admin badge */}

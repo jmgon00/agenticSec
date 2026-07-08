@@ -9,7 +9,7 @@ interface AgentCardProps {
 
 export const AgentCard = ({ agent }: AgentCardProps) => {
   const categoryColor = agent.category === "educativo" ? "bg-blue-500/20 text-blue-400" : "bg-purple-500/20 text-purple-400"
-  const typeLabel = agent.type === "chat" ? "💬 Chat" : "📋 Form"
+  const typeLabel = agent.type === "chat" ? "💬 Chat" : agent.type === "form" ? "📋 Form" : "🔗 Link"
 
   return (
     <Link href={`/agents/${agent.slug}`}>

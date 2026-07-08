@@ -68,6 +68,23 @@ Sé Socrático - haz preguntas guía.`,
     maxTokens: 1200,
     temperature: 0.8,
   },
+  {
+    name: "Agent Job",
+    slug: "agent-job",
+    description: "Automatiza tu búsqueda de empleo en portales latinoamericanos",
+    fullDescription:
+      "Plataforma inteligente que completa perfiles, busca ofertas y aplica automáticamente en LinkedIn, Bumeran, Computrabajo y ZonaJobs. Carga tu CV una vez y deja que IA haga el trabajo.",
+    category: "productivo",
+    type: "link",
+    icon: "💼",
+    externalUrl: "https://agent-job.com",
+    features: [
+      "Carga Excel → optimización automática",
+      "Integración con 4 portales principales",
+      "Búsqueda y aplicación automática",
+      "Dashboard en tiempo real",
+    ],
+  },
 ]
 
 export const getAgentBySlug = (slug: string): (typeof SEED_AGENTS)[0] | undefined => {

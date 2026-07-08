@@ -5,12 +5,14 @@ export interface Agent {
   description: string
   fullDescription: string
   category: "educativo" | "productivo"
-  type: "chat" | "form"
+  type: "chat" | "form" | "link"
   icon: string
-  instructions: string
+  instructions?: string
   inputFormat?: Record<string, unknown>
-  maxTokens: number
-  temperature: number
+  maxTokens?: number
+  temperature?: number
+  externalUrl?: string
+  features?: string[]
   createdAt: Date
   updatedAt: Date
 }

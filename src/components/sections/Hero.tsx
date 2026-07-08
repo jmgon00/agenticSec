@@ -5,10 +5,6 @@ import { HERO } from "@/content/config";
 import { Button } from "@/components/ui/Button";
 
 export const Hero = () => {
-  const scrollToAgenticIA = () => {
-    const section = document.getElementById("agentic-ia");
-    section?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-dark-base via-gray-950 to-gray-900 px-4 pt-20 relative overflow-hidden">
@@ -27,16 +23,11 @@ export const Hero = () => {
         <p className="text-lg md:text-xl text-gray-300 mb-8 font-light">
           {HERO.subtitle}
         </p>
-        <div className="flex gap-4 justify-center flex-wrap">
-          <Button size="lg" onClick={scrollToAgenticIA}>
-            {HERO.cta}
+        <Link href="/agents">
+          <Button size="lg">
+            Explorar Agentes 🤖
           </Button>
-          <Link href="/agents">
-            <Button size="lg" variant="secondary">
-              Explorar Agentes 🤖
-            </Button>
-          </Link>
-        </div>
+        </Link>
       </div>
     </section>
   );

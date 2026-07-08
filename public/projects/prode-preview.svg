@@ -1,0 +1,110 @@
+<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a472a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d2817;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f5f5f5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e8e8e8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="600" height="400" fill="#0f172a"/>
+
+  <!-- Header -->
+  <rect width="600" height="60" fill="url(#headerGrad)"/>
+  <text x="20" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#4ade80">
+    ⚽ PRODE MUNDIAL
+  </text>
+
+  <!-- Main content area -->
+  <rect x="15" y="75" width="570" height="310" fill="#1e293b" stroke="#334155" stroke-width="1" rx="8"/>
+
+  <!-- League header -->
+  <rect x="25" y="85" width="550" height="50" fill="url(#cardGrad)" rx="4"/>
+  <text x="35" y="110" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0d2817">
+    Liga de Demostración - Copa Mundial 2026
+  </text>
+
+  <!-- Fixture cards -->
+  <g>
+    <!-- Card 1 -->
+    <rect x="25" y="150" width="170" height="60" fill="#1e293b" stroke="#475569" stroke-width="1" rx="4"/>
+    <text x="35" y="168" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#e2e8f0">
+      Argentina vs Francia
+    </text>
+    <circle cx="50" cy="190" r="6" fill="#4ade80"/>
+    <text x="60" y="195" font-family="Arial, sans-serif" font-size="11" fill="#94a3b8">
+      Predecir resultado
+    </text>
+
+    <!-- Card 2 -->
+    <rect x="215" y="150" width="170" height="60" fill="#1e293b" stroke="#475569" stroke-width="1" rx="4"/>
+    <text x="225" y="168" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#e2e8f0">
+      Brasil vs España
+    </text>
+    <circle cx="240" cy="190" r="6" fill="#60a5fa"/>
+    <text x="250" y="195" font-family="Arial, sans-serif" font-size="11" fill="#94a3b8">
+      En progreso
+    </text>
+
+    <!-- Card 3 -->
+    <rect x="405" y="150" width="170" height="60" fill="#1e293b" stroke="#475569" stroke-width="1" rx="4"/>
+    <text x="415" y="168" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#e2e8f0">
+      Alemania vs Italia
+    </text>
+    <circle cx="430" cy="190" r="6" fill="#f87171"/>
+    <text x="440" y="195" font-family="Arial, sans-serif" font-size="11" fill="#94a3b8">
+      Finalizado
+    </text>
+  </g>
+
+  <!-- Stats section -->
+  <g>
+    <text x="35" y="240" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#e2e8f0">
+      Tu Posición: 3er Lugar
+    </text>
+    <rect x="35" y="250" width="100" height="30" fill="#475569" rx="4"/>
+    <text x="45" y="272" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#e2e8f0">
+      Puntos: 45
+    </text>
+
+    <rect x="145" y="250" width="100" height="30" fill="#4ade80" rx="4" opacity="0.2"/>
+    <text x="155" y="272" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#4ade80">
+      Aciertos: 18/25
+    </text>
+
+    <rect x="255" y="250" width="100" height="30" fill="#60a5fa" rx="4" opacity="0.2"/>
+    <text x="265" y="272" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#60a5fa">
+      Errores: 7/25
+    </text>
+
+    <rect x="365" y="250" width="160" height="30" fill="#fbbf24" rx="4" opacity="0.2"/>
+    <text x="375" y="272" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#fbbf24">
+      Participantes: 128
+    </text>
+  </g>
+
+  <!-- Action buttons -->
+  <rect x="35" y="300" width="120" height="35" fill="#4ade80" rx="4"/>
+  <text x="95" y="323" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0d2817" text-anchor="middle">
+    Hacer Apuestas
+  </text>
+
+  <rect x="165" y="300" width="120" height="35" fill="#60a5fa" rx="4"/>
+  <text x="225" y="323" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">
+    Ver Clasificación
+  </text>
+
+  <rect x="295" y="300" width="140" height="35" fill="#f87171" rx="4" opacity="0.8"/>
+  <text x="365" y="323" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">
+    Compartir Liga
+  </text>
+
+  <!-- Footer indicator -->
+  <text x="300" y="365" font-family="Arial, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">
+    📱 Interfaz responsiva • 🎮 Interactivo • ⚡ Desarrollado con Claude AI
+  </text>
+</svg>

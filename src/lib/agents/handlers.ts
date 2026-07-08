@@ -22,12 +22,17 @@ export async function processAgentQuery({
     throw new Error("Agent not found")
   }
 
+  // Link-type agents cannot be executed
+  if (agent.type === "link") {
+    throw new Error("This agent is an external link and cannot be executed here")
+  }
+
   // Execute Claude API
   const { response, tokensUsed } = await executeAgent({
-    agentInstructions: agent.instructions,
+    agentInstructions: agent.instructions || "",
     userQuery: query,
-    maxTokens: agent.maxTokens,
-    temperature: agent.temperature,
+    maxTokens: agent.maxTokens || 1000,
+    temperature: agent.temperature || 0.7,
   })
 
   // Update or create session

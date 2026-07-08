@@ -3,10 +3,10 @@ import { prisma } from "@/lib/db"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { "agent-id": string } }
+  { params }: { params: Promise<{ "agent-id": string }> }
 ) {
   try {
-    const agentId = params["agent-id"]
+    const { "agent-id": agentId } = await params
     const userEmail = request.nextUrl.searchParams.get("userEmail")
 
     if (!userEmail) {

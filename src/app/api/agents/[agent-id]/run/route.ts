@@ -24,10 +24,10 @@ function checkRateLimit(key: string): boolean {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { "agent-id": string } }
+  { params }: { params: Promise<{ "agent-id": string }> }
 ) {
   try {
-    const agentId = params["agent-id"]
+    const { "agent-id": agentId } = await params
     const body = await request.json()
     const { userEmail, query, sessionId } = body
 

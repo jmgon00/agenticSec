@@ -1,5 +1,6 @@
 import { AgentDetail } from "@/components/sections/AgentDetail"
 
-export default function AgentDetailPage({ params }: { params: { "agent-id": string } }) {
-  return <AgentDetail agentSlug={params["agent-id"]} />
+export default async function AgentDetailPage({ params }: { params: Promise<{ "agent-id": string }> }) {
+  const { "agent-id": agentId } = await params
+  return <AgentDetail agentSlug={agentId} />
 }

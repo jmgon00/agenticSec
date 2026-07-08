@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { HERO } from "@/content/config";
 import { Button } from "@/components/ui/Button";
 
@@ -23,11 +22,12 @@ export const Hero = () => {
         <p className="text-lg md:text-xl text-gray-300 mb-8 font-light">
           {HERO.subtitle}
         </p>
-        <Link href="/agents">
-          <Button size="lg">
-            Explorar Agentes 🤖
-          </Button>
-        </Link>
+        <Button size="lg" onClick={() => {
+          const section = document.getElementById("agentic-ia");
+          section?.scrollIntoView({ behavior: "smooth" });
+        }}>
+          {HERO.cta}
+        </Button>
       </div>
     </section>
   );

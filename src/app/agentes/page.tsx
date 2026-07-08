@@ -1,0 +1,60 @@
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+
+export default function AgentesPage() {
+  return (
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-dark-base via-gray-950 to-gray-900 px-4 pt-20">
+      <div className="text-center max-w-3xl">
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-cyan-400 via-magenta-400 to-cyan-400 bg-clip-text text-transparent">
+            Agentes de IA
+          </h1>
+          <p className="text-lg md:text-xl text-gray-300 font-light mb-8">
+            Explora agentes inteligentes diseñados para educar y potenciar tu trabajo en seguridad.
+            Desde tutoriales interactivos hasta herramientas de análisis profesional.
+          </p>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-6 hover:border-cyan-400/50 transition-colors">
+            <div className="text-4xl mb-4">📚</div>
+            <h3 className="text-xl font-semibold text-white mb-2">Educativo</h3>
+            <p className="text-gray-400 text-sm">
+              Aprende conceptos de seguridad con tutores inteligentes
+            </p>
+          </div>
+
+          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-6 hover:border-magenta-400/50 transition-colors">
+            <div className="text-4xl mb-4">🔧</div>
+            <h3 className="text-xl font-semibold text-white mb-2">Productivo</h3>
+            <p className="text-gray-400 text-sm">
+              Herramientas profesionales para análisis y reportes
+            </p>
+          </div>
+
+          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-6 hover:border-cyan-400/50 transition-colors">
+            <div className="text-4xl mb-4">⚡</div>
+            <h3 className="text-xl font-semibold text-white mb-2">Rápido</h3>
+            <p className="text-gray-400 text-sm">
+              Accede al poder de Claude AI instantáneamente
+            </p>
+          </div>
+        </div>
+
+        {/* CTA Button */}
+        <Link href="/agents">
+          <Button size="lg" className="bg-gradient-to-r from-cyan-400 to-magenta-400 hover:from-cyan-300 hover:to-magenta-300">
+            Explorar Galería de Agentes 🤖
+          </Button>
+        </Link>
+
+        {/* Footer text */}
+        <p className="mt-8 text-gray-500 text-sm">
+          Construído sobre Next.js, Prisma y Claude AI
+        </p>
+      </div>
+    </section>
+  );
+}

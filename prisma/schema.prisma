@@ -52,12 +52,14 @@ model Agent {
   description     String   // One-line description for gallery
   fullDescription String   // Longer description for detail page
   category        String   // "educativo" | "productivo"
-  type            String   // "chat" | "form"
+  type            String   // "chat" | "form" | "link"
   icon            String   // Emoji: "🔍", "📚", etc
-  instructions    String   // System prompt for Claude
+  instructions    String?  // System prompt for Claude (optional for type="link")
   inputFormat     Json?    // Form field schema if type="form"
-  maxTokens       Int      @default(1000)
-  temperature     Float    @default(0.7)
+  maxTokens       Int?     // Optional for type="link"
+  temperature     Float?   // Optional for type="link"
+  externalUrl     String?  // URL for type="link" agents
+  features        Json?    // Array of feature strings for type="link"
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

@@ -56,53 +56,57 @@ export default function AgentesPage() {
           </p>
 
           {/* Projects Grid */}
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="w-full max-w-4xl mx-auto space-y-6">
             {/* Prode Mundialista */}
-            <div className="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden hover:border-cyan-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20 md:col-span-2">
-              <div className="grid md:grid-cols-2">
-                {/* Preview/Iframe */}
-                <div className="bg-black border-r border-gray-700 h-80">
-                  <iframe
-                    src="https://prode-mundial-2026-frontend-production.up.railway.app/"
-                    title="Prode Mundialista Preview"
-                    className="w-full h-full border-none"
-                    style={{ pointerEvents: "none" }}
-                  />
+            <div className="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden hover:border-cyan-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20">
+              {/* Header Info */}
+              <div className="p-6 bg-gradient-to-r from-gray-900/50 to-gray-800/50 border-b border-gray-700">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-3xl font-semibold text-white mb-2">
+                      Prode Mundialista
+                    </h3>
+                    <p className="text-gray-400 text-sm leading-relaxed max-w-2xl">
+                      Aplicativo lúdico sin fines de lucro con fixture interactivo para la Copa Mundial 2026. Desarrollado completamente con Claude AI utilizando metodología agentic.
+                    </p>
+                  </div>
                 </div>
 
-                {/* Info */}
-                <div className="p-6 flex flex-col justify-center">
-                  <h3 className="text-2xl font-semibold text-white mb-3">
-                    Prode Mundialista
-                  </h3>
-                  <p className="text-gray-400 text-sm mb-4 leading-relaxed">
-                    Aplicativo lúdico sin fines de lucro con fixture interactivo para la Copa Mundial 2026. Desarrollado completamente con Claude AI utilizando metodología agentic.
-                  </p>
-                  <div className="flex gap-2 mb-4 flex-wrap">
-                    <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded">Next.js</span>
-                    <span className="text-xs bg-magenta-500/20 text-magenta-400 px-2 py-1 rounded">React</span>
-                    <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">Claude AI</span>
-                    <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Railway</span>
-                  </div>
-                  <div className="flex gap-3 flex-wrap">
-                    <a
-                      href="https://prode-mundial-2026-frontend-production.up.railway.app/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors"
-                    >
-                      Abrir App ↗
-                    </a>
-                    <a
-                      href="https://github.com/jmgon00/prode-mundial-2026"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-magenta-400 hover:text-magenta-300 transition-colors"
-                    >
-                      Ver Código →
-                    </a>
-                  </div>
+                <div className="flex gap-2 mb-4 flex-wrap">
+                  <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded">Next.js</span>
+                  <span className="text-xs bg-magenta-500/20 text-magenta-400 px-2 py-1 rounded">React</span>
+                  <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">Claude AI</span>
+                  <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Railway</span>
                 </div>
+
+                <div className="flex gap-3 flex-wrap">
+                  <a
+                    href="https://prode-mundial-2026-frontend-production.up.railway.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors text-sm"
+                  >
+                    Abrir App ↗
+                  </a>
+                  <a
+                    href="https://github.com/jmgon00/prode-mundial-2026"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-magenta-400 hover:text-magenta-300 transition-colors text-sm"
+                  >
+                    Ver Código →
+                  </a>
+                </div>
+              </div>
+
+              {/* Iframe - Large preview */}
+              <div className="bg-black w-full" style={{ height: "900px" }}>
+                <iframe
+                  src="https://prode-mundial-2026-frontend-production.up.railway.app/leagues/d1dd7258-49f3-46af-a4e0-c247a28e3fc9"
+                  title="Prode Mundialista - Liga Demo"
+                  className="w-full h-full border-none"
+                  allow="autoplay; encrypted-media"
+                />
               </div>
             </div>
 

@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -42,5 +42,46 @@ model Consultation {
 
   @@index([email])
   @@index([status])
+  @@index([createdAt])
+}
+
+model Agent {
+  id              String   @id @default(cuid())
+  name            String   // "Agente Analizador de Vulnerabilidades"
+  slug            String   @unique // "vuln-analyzer"
+  description     String   // One-line description for gallery
+  fullDescription String   // Longer description for detail page
+  category        String   // "educativo" | "productivo"
+  type            String   // "chat" | "form"
+  icon            String   // Emoji: "🔍", "📚", etc
+  instructions    String   // System prompt for Claude
+  inputFormat     Json?    // Form field schema if type="form"
+  maxTokens       Int      @default(1000)
+  temperature     Float    @default(0.7)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sessions        AgentSession[]
+
+  @@index([slug])
+  @@index([category])
+}
+
+model AgentSession {
+  id              String   @id @default(cuid())
+  userEmail       String   // User's email from localStorage
+  agentId         String
+  agent           Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  title           String?  // Auto-generated from first message
+  messages        Json     // Array of {role: "user"|"assistant", content, timestamp, tokens?}
+  totalMessages   Int      @default(0)
+  totalTokens     Int      @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userEmail])
+  @@index([agentId])
   @@index([createdAt])
 }

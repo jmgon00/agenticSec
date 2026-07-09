@@ -66,12 +66,13 @@ export const ChatInbox = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="flex gap-2 border-t border-gray-800 pt-4">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Escribí tu mensaje..."
-          className="flex-1"
-        />
+        <div className="flex-1">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Escribí tu mensaje..."
+          />
+        </div>
         <Button type="submit" disabled={sending}>
           Enviar
         </Button>

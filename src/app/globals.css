@@ -7,32 +7,44 @@
  * animate-float, etc.) actually get generated in production.
  */
 @theme {
-  --color-cyan-400: #00D9FF;
-  --color-cyan-500: #00C2E0;
-  --color-cyan-600: #00B8CC;
+  --color-cyan-400: #3b82f6;
+  --color-cyan-500: #2563eb;
+  --color-cyan-600: #1d4ed8;
 
-  --color-magenta-400: #FF006E;
-  --color-magenta-500: #FF0066;
-  --color-magenta-600: #E60060;
+  --color-magenta-400: #facc15;
+  --color-magenta-500: #eab308;
+  --color-magenta-600: #ca8a04;
 
-  --color-accent: #00F5FF;
+  --color-accent: #60a5fa;
 
-  --color-dark-base: #0a0e27;
-  --color-dark-50: #f9fafb;
-  --color-dark-100: #f3f4f6;
-  --color-dark-200: #e5e7eb;
-  --color-dark-300: #d1d5db;
-  --color-dark-400: #9ca3af;
-  --color-dark-500: #6b7280;
-  --color-dark-600: #4b5563;
-  --color-dark-700: #374151;
-  --color-dark-800: #1f2937;
-  --color-dark-900: #111827;
-  --color-dark-950: #030712;
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #262626;
+  --color-gray-900: #171717;
+  --color-gray-950: #0a0a0a;
 
-  --shadow-glow-cyan: 0 0 20px rgba(0, 217, 255, 0.4), inset 0 0 20px rgba(0, 217, 255, 0.1);
-  --shadow-glow-magenta: 0 0 20px rgba(255, 0, 110, 0.4), inset 0 0 20px rgba(255, 0, 110, 0.1);
-  --shadow-cyan-lg: 0 0 30px rgba(0, 217, 255, 0.3);
+  --color-dark-base: #0a0a0a;
+  --color-dark-50: #fafafa;
+  --color-dark-100: #f5f5f5;
+  --color-dark-200: #e5e5e5;
+  --color-dark-300: #d4d4d4;
+  --color-dark-400: #a3a3a3;
+  --color-dark-500: #737373;
+  --color-dark-600: #525252;
+  --color-dark-700: #404040;
+  --color-dark-800: #262626;
+  --color-dark-900: #171717;
+  --color-dark-950: #0a0a0a;
+
+  --shadow-glow-cyan: 0 0 20px rgba(37, 99, 235, 0.4), inset 0 0 20px rgba(37, 99, 235, 0.1);
+  --shadow-glow-magenta: 0 0 20px rgba(250, 204, 21, 0.4), inset 0 0 20px rgba(250, 204, 21, 0.1);
+  --shadow-cyan-lg: 0 0 30px rgba(37, 99, 235, 0.3);
 
   --animate-gradientFlow: gradientFlow 3s ease-in-out infinite;
   --animate-float: float 8s ease-in-out infinite;
@@ -44,23 +56,23 @@
 @layer base {
   :root {
     --foreground: #ffffff;
-    --background: #0a0e27;
-    --primary: #00D9FF;
-    --primary-dark: #00B8CC;
-    --secondary: #FF006E;
-    --secondary-light: #FF4D8D;
-    --accent: #00F5FF;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-400: #9ca3af;
-    --gray-500: #6b7280;
-    --gray-600: #4b5563;
-    --gray-700: #374151;
-    --gray-800: #1f2937;
-    --gray-900: #111827;
-    --gray-950: #030712;
+    --background: #0a0a0a;
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --secondary: #eab308;
+    --secondary-light: #fde047;
+    --accent: #60a5fa;
+    --gray-50: #fafafa;
+    --gray-100: #f5f5f5;
+    --gray-200: #e5e5e5;
+    --gray-300: #d4d4d4;
+    --gray-400: #a3a3a3;
+    --gray-500: #737373;
+    --gray-600: #525252;
+    --gray-700: #404040;
+    --gray-800: #262626;
+    --gray-900: #171717;
+    --gray-950: #0a0a0a;
   }
 
   /*
@@ -202,26 +214,26 @@
 
 /* Glassmorphism utility */
 .glass {
-  background: rgba(17, 24, 39, 0.5);
+  background: rgba(23, 23, 23, 0.5);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(0, 217, 255, 0.2);
+  border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
 .glass-xl {
-  background: rgba(17, 24, 39, 0.5);
+  background: rgba(23, 23, 23, 0.5);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 217, 255, 0.2);
+  border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
 /* Glow effects */
 .glow-cyan {
-  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4),
-              inset 0 0 20px rgba(0, 217, 255, 0.1);
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.4),
+              inset 0 0 20px rgba(37, 99, 235, 0.1);
 }
 
 .glow-magenta {
-  box-shadow: 0 0 20px rgba(255, 0, 110, 0.4),
-              inset 0 0 20px rgba(255, 0, 110, 0.1);
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.4),
+              inset 0 0 20px rgba(250, 204, 21, 0.1);
 }

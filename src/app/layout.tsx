@@ -31,7 +31,7 @@ export default function RootLayout({
       <head>
         <style dangerouslySetInnerHTML={{__html: `
           html, body { margin: 0; padding: 0; }
-          body { background-color: #0a0e27; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+          body { background-color: #0a0a0a; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
           * { box-sizing: border-box; }
         `}} />
       </head>

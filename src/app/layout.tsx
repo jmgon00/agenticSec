@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { SITE_CONFIG } from "@/content/config";
 import { Header } from "@/components/sections/Header";
-import { Footer } from "@/components/sections/Footer";
+import { ConditionalFooter } from "@/components/sections/ConditionalFooter";
 
 export const metadata: Metadata = {
   title: "AgenticSec - Análisis de Seguridad & Automatización IA",
@@ -38,7 +38,7 @@ export default function RootLayout({
       <body className="bg-gray-900 text-white">
         <Header />
         <main className="pt-16">{children}</main>
-        <Footer />
+        <ConditionalFooter />
       </body>
     </html>
   );

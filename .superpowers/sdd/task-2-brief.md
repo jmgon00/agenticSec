@@ -1,56 +1,80 @@
-# Task 2: Create Portfolio Data Structure
+## Task 2: Hide the global Footer on Home only
 
 **Files:**
-- Create: `src/content/portfolio.ts`
+- Create: `src/components/sections/ConditionalFooter.tsx`
+- Modify: `src/app/layout.tsx:1-45` (swap the `Footer` import/usage for `ConditionalFooter`)
 
 **Interfaces:**
-- Consumes: None
-- Produces: `PORTFOLIO_CASES` array with type `CaseStudy[]`
+- Consumes: existing `Footer` component (`src/components/sections/Footer.tsx`, named export `Footer`, no props) — do not modify `Footer.tsx` itself.
+- Produces: `ConditionalFooter` component, named export, no props, for use in `layout.tsx`.
 
-## Step 1: Define portfolio data structure
+- [ ] **Step 1: Create `ConditionalFooter.tsx`**
 
-Create `src/content/portfolio.ts`:
+```tsx
+"use client";
 
-```typescript
-export interface CaseStudy {
-  id: string;
-  title: string;
-  category: "analysis" | "automation" | "development" | "consulting";
-  problem: string;
-  solution: string;
-  results: string;
-  technologies: string[];
-  image: string;
-  video?: string;
-}
+import { usePathname } from "next/navigation";
+import { Footer } from "./Footer";
 
-export const PORTFOLIO_CASES: CaseStudy[] = [
-  {
-    id: "case-1",
-    title: "Análisis de Vulnerabilidades - E-commerce",
-    category: "analysis",
-    problem: "Plataforma e-commerce con vulnerabilidades críticas sin identificar.",
-    solution: "Audit completo usando metodología OWASP, identificación de 15 vulnerabilidades críticas.",
-    results: "Reducción de riesgo de 85%, implementación de WAF y hardening de aplicación.",
-    technologies: ["OWASP ZAP", "Burp Suite", "Python", "SQL"],
-    image: "/images/portfolio/ecommerce-audit.jpg",
-  },
-  {
-    id: "case-2",
-    title: "Automatización de Reportes - Agente IA",
-    category: "automation",
-    problem: "Reportes manuales de seguridad tomaban 8 horas semanales.",
-    solution: "Implementar agente IA autónomo que genera reportes automáticamente.",
-    results: "Reducción de 8 horas a 30 minutos semanales, precisión 98%.",
-    technologies: ["Python", "Claude API", "Pandas", "Jinja2"],
-    image: "/images/portfolio/ai-reports.jpg",
-  },
-];
+export const ConditionalFooter = () => {
+  const pathname = usePathname();
+  if (pathname === "/") return null;
+  return <Footer />;
+};
 ```
 
-## Step 2: Commit
+- [ ] **Step 2: Update `layout.tsx` to use it**
+
+In `src/app/layout.tsx`, change the import:
+
+```tsx
+import { Footer } from "@/components/sections/Footer";
+```
+to:
+```tsx
+import { ConditionalFooter } from "@/components/sections/ConditionalFooter";
+```
+
+And change the JSX body from:
+
+```tsx
+      <body className="bg-gray-900 text-white">
+        <Header />
+        <main className="pt-16">{children}</main>
+        <Footer />
+      </body>
+```
+to:
+```tsx
+      <body className="bg-gray-900 text-white">
+        <Header />
+        <main className="pt-16">{children}</main>
+        <ConditionalFooter />
+      </body>
+```
+
+Also delete the now-stale comment above `Home` in `src/app/page.tsx` that references Footer duplication — this is handled in Task 5, skip here.
+
+- [ ] **Step 3: Verify with TypeScript**
+
+Run: `npx tsc --noEmit`
+Expected: no output.
+
+- [ ] **Step 4: Manual verification**
+
+Run: `npm run dev`, then in another terminal:
+```bash
+curl -s http://localhost:3000/ | grep -c "footer"
+curl -s http://localhost:3000/portfolio | grep -c "footer"
+```
+Expected: the `/` request shows fewer (or zero) matches for footer-related markup than `/portfolio` — confirming Home no longer renders the Footer while `/portfolio` still does. (Exact match count depends on Footer's internal markup; the point is `/` < `/portfolio`.)
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add src/content/portfolio.ts
-git commit -m "feat: add portfolio data structure and initial case studies"
+git add src/components/sections/ConditionalFooter.tsx src/app/layout.tsx
+git commit -m "feat: hide global footer on home only"
 ```
+
+---
+

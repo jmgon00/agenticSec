@@ -1,87 +1,74 @@
-# Task 2 Report: Create Portfolio Data Structure
+# Task 2 Report: Hide the Global Footer on Home Only
 
-**Date:** 2026-07-04  
-**Task:** Create `src/content/portfolio.ts` with portfolio data structure and initial case studies
+## Status
+**DONE**
 
 ## Implementation Summary
 
 ### Files Created
-- `src/content/portfolio.ts` - Portfolio data structure with CaseStudy interface and PORTFOLIO_CASES array
+- **`src/components/sections/ConditionalFooter.tsx`** (new file)
+  - Client component that conditionally renders Footer
+  - Uses `usePathname()` from `next/navigation` to check current route
+  - Returns `null` when pathname is "/" (home page)
+  - Returns `<Footer />` for all other routes
 
-### Interface Definition
+### Files Modified
+- **`src/app/layout.tsx`**
+  - Changed import from `Footer` to `ConditionalFooter` (line 5)
+  - Updated JSX body to use `<ConditionalFooter />` instead of `<Footer />` (line 41)
 
-Created `CaseStudy` interface with the following fields:
-```typescript
-export interface CaseStudy {
-  id: string;
-  title: string;
-  category: "analysis" | "automation" | "development" | "consulting";
-  problem: string;
-  solution: string;
-  results: string;
-  technologies: string[];
-  image: string;
-  video?: string;
-}
-```
-
-All fields are properly typed:
-- `id`: string identifier for the case study
-- `title`: case study title
-- `category`: literal union type restricting to 4 categories
-- `problem`: description of the problem addressed
-- `solution`: explanation of the solution implemented
-- `results`: results achieved
-- `technologies`: array of technology strings used
-- `image`: path to portfolio image
-- `video`: optional video URL field
-
-### Data Initialization
-
-Created `PORTFOLIO_CASES` array with two case studies as specified:
-
-1. **case-1**: "Análisis de Vulnerabilidades - E-commerce"
-   - Category: analysis
-   - E-commerce platform vulnerability audit using OWASP methodology
-   - 15 critical vulnerabilities identified
-   - Technologies: OWASP ZAP, Burp Suite, Python, SQL
-
-2. **case-2**: "Automatización de Reportes - Agente IA"
-   - Category: automation
-   - AI agent autonomous report generation
-   - Reduced 8 hours to 30 minutes weekly with 98% accuracy
-   - Technologies: Python, Claude API, Pandas, Jinja2
+## Verification Results
 
 ### TypeScript Compilation
-
-Built project successfully:
+```bash
+$ npx tsc --noEmit
 ```
-✓ Compiled successfully in 2.0s
-✓ Finished TypeScript in 2.8s
-✓ Generating static pages using 7 workers (6/6) in 864ms
-```
+**Result:** No output (success ✓)
 
-No TypeScript errors or warnings detected.
+### Manual Verification with curl
+```bash
+$ curl -s http://localhost:3000/ | grep -c "footer"
+0
 
-### Git Commit
-
-Successfully created commit:
-```
-Commit: 6f9b67f
-Message: feat: add portfolio data structure and initial case studies
-Files Changed: 1 file, 34 insertions(+)
+$ curl -s http://localhost:3000/portfolio | grep -c "footer"
+1
 ```
 
-## Status
+**Result:** 
+- Home page (`/`): 0 footer matches ✓
+- Portfolio page (`/portfolio`): 1 footer match ✓
+- Confirms footer is hidden on home only ✓
 
-**STATUS: DONE**
+## Code Quality Check
 
-All requirements met:
-- ✅ `src/content/portfolio.ts` created with exact specification
-- ✅ `CaseStudy` interface defined with complete typing
-- ✅ `PORTFOLIO_CASES` initialized with 2 case studies
-- ✅ TypeScript compilation successful (no errors)
-- ✅ Commit created with specified message
-- ✅ File follows existing content directory pattern
+### ConditionalFooter.tsx compliance
+- ✓ Matches brief exactly
+- ✓ Has `"use client"` directive (required for usePathname)
+- ✓ Named export `ConditionalFooter`
+- ✓ No props
+- ✓ Imports Footer from `./Footer`
 
-No concerns or blockers.
+### layout.tsx compliance
+- ✓ Import line changed correctly
+- ✓ JSX swap completed
+- ✓ No other changes in file
+- ✓ Scoped modification only
+
+## Commits Created
+- **f8037ef** - `feat: hide global footer on home only`
+  - Added `src/components/sections/ConditionalFooter.tsx`
+  - Modified `src/app/layout.tsx`
+
+## Self-Review Findings
+- ✓ ConditionalFooter.tsx matches brief exactly
+- ✓ layout.tsx changes are scoped correctly
+- ✓ TypeScript compilation successful
+- ✓ Manual curl verification passed both routes
+- ✓ Commit follows required format
+- ✓ No concerns or issues
+
+## Notes
+- The implementation is clean and minimal
+- No modifications to existing Footer component (as required)
+- Client-side conditional rendering avoids server-side complexity
+- Footer is fully hidden on home page (0 matches) and present on other routes

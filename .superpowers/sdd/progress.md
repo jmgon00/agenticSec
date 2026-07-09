@@ -1,44 +1,30 @@
-# Website Expansion Implementation Progress
+# Home Chat Redesign Implementation Progress
 
-**Start Date:** 2026-07-06  
-**Base Commit:** 1ada636 (docs: add implementation plan for website expansion)  
-**Plan:** docs/superpowers/plans/2026-07-06-website-expansion-implementation.md
+**Start Date:** 2026-07-09
+**Base Commit:** 6bc1014 (docs: add implementation plan for home chat redesign)
+**Plan:** docs/superpowers/plans/2026-07-09-home-chat-redesign.md
 
-## Status: PHASE 4 TESTING COMPLETE ✅ (15/16 complete - Ready for Vercel Deploy)
+## Status: COMPLETE ✅ (final review passed after one fix round)
 
 ## Tasks Status
 
-### Phase 1: Data Structures & Core Components ✅
-- [x] Task 1: Create Portfolio Data Types & Interfaces (89af7ea)
-- [x] Task 2: Create Security Services Data (74445fe)
-- [x] Task 3: Create Agentic IA Projects Data (b41b2c5)
-- [x] Task 4: Create Security Cases Data (63a9885)
-- [x] Task 5: Create SecurityServiceCard Component (f78645c)
-- [x] Task 6: Create ProcessTimeline Component (6135247)
+- [x] Task 1: Collapse Header to hamburger-only nav with MobileMenu (8be11bd, review clean)
+- [x] Task 2: Hide global Footer on Home only (f8037ef, review clean)
+- [x] Task 3: Build ChatInbox mock chat component (b72253e, review clean)
+- [x] Task 4: Simplify Hero to compact title/subtitle block (c52d011, review clean)
+- [x] Task 5: Rewrite Home page to render Hero + ChatInbox only (9bd80d8, review clean)
+- [x] Task 6: Delete unused SecurityServices and AgenticIAFeatures (0cc7c5a, review clean)
 
-### Phase 2: Home & Navigation Updates ✅
-- [x] Task 7: Update Header Navigation (b3f1512)
-- [x] Task 8: Create SecurityServices Teaser Section (a063a58)
-- [x] Task 9: Update Home Page with Teasers (c788bbb)
+## Final whole-branch review
 
-### Phase 3: Dedicated Pages & Forms ✅
-- [x] Task 10: Create Consultation Form Component (2e65d36)
-- [x] Task 11: Create Consultation API Endpoint (ac6d04e)
-- [x] Task 12: Create /security-services Page (54b959f)
-- [x] Task 13: Enhance /agentic-ia Page (9a139e9)
-- [x] Task 14: Create PortfolioItemModal Component (3e0afbf)
+Reviewed range 6bc1014..0cc7c5a. Found:
+- Critical: `MobileMenu` nested inside `<header backdrop-blur-sm>` — backdrop-filter creates a containing block for its `fixed` descendant, clipping the slide-in drawer to the header's height instead of the viewport.
+- Important: `ChatInbox`'s `<Input className="flex-1">` landed on the inner `<input>`, not the actual flex-child wrapper `<div>` that `Input` renders, so the field didn't grow to fill the row.
+- Both fixed in one commit: a032f4a ("fix: escape MobileMenu from header's backdrop-blur containing block, fix chat input flex sizing").
 
-### Phase 4: Testing & Deployment ✅
-- [x] Task 15: Test All Pages Locally (2026-07-07)
-- [x] Task 16: Deploy to Vercel (In Progress)
+## Minor findings log (not fixed, informational)
 
-## Completed Phases Summary
-
-✅ **Phase 1:** Data structures and core UI components complete (6/6)
-✅ **Phase 2:** Home page integration complete with navigation updates (3/3)
-✅ **Phase 3:** Dedicated pages and forms complete (5/5)
-✅ **Phase 4:** Testing & Deployment complete (2/2)
-  - ✅ Local testing: All routes (200), APIs working, Forms functional
-  - ✅ Production build: Compiled in 1.8s, all static pages generated
-  - ✅ Production server: Running on port 3000, verified working
-  - ✅ Schema: Back to PostgreSQL for Vercel deployment
+- `Hero.tsx` keeps `"use client"` with no hooks/state — could be a server component.
+- `page.tsx` uses `100vh` (not `100dvh`) for the no-scroll home container — may show a sliver of scroll on mobile browsers with a retracting address bar.
+- `getMockReply()` dropped the `userText` param the spec's function signature suggested — harmless now, but the future real-backend swap will need to thread the user's text through.
+- `MobileMenu` has no Escape-to-close or focus trap — standard for a modal drawer, not required by spec.

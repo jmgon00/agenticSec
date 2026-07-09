@@ -1,150 +1,109 @@
-# Task 3: Create Agentic IA Data Structure
+## Task 3: Build the `ChatInbox` mock chat component
 
 **Files:**
-- Create: `src/content/agentic-ia.ts`
+- Create: `src/components/sections/ChatInbox.tsx`
 
 **Interfaces:**
-- Consumes: None
-- Produces: `AGENTIC_IA_CONTENT` object with 5 tabs (Concepto, Para tu negocio, Mi metodología, Casos de uso, Pruébalo)
+- Consumes: `Button` from `@/components/ui/Button` (props: `children`, `variant?`, `size?`, plus all native button props — `type`, `disabled`, etc.), `Input` from `@/components/ui/Input` (props: all native input props, plus optional `label`/`error`, which this task does not use).
+- Produces: `ChatInbox` component, named export, no props, self-contained (owns its own message state). Later tasks (Task 5) import it as `import { ChatInbox } from "@/components/sections/ChatInbox";` and render `<ChatInbox />` with no props.
 
-## Step 1: Define agentic IA content structure
+- [ ] **Step 1: Create `ChatInbox.tsx`**
 
-Create `src/content/agentic-ia.ts`:
+```tsx
+"use client";
 
-```typescript
-export interface AgenticIATab {
+import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+
+interface ChatMessage {
   id: string;
-  label: string;
-  labelEs: string;
-  content: string;
+  role: "user" | "bot";
+  text: string;
 }
 
-export const AGENTIC_IA_CONTENT: AgenticIATab[] = [
-  {
-    id: "concepto",
-    label: "Concept",
-    labelEs: "Concepto",
-    content: `
-## ¿Qué es Agentic IA?
+const WELCOME_MESSAGE: ChatMessage = {
+  id: "welcome",
+  role: "bot",
+  text: "👋 Hola, soy el asistente de AgenticSec. Preguntame lo que necesites — muy pronto voy a poder responderte con IA de verdad.",
+};
 
-Agentic IA se refiere a sistemas de inteligencia artificial que actúan de manera autónoma, tomando decisiones y ejecutando tareas sin intervención humana constante.
+const MOCK_REPLY_DELAY_MS = 600;
+const MOCK_REPLY_TEXT = "Próximamente vas a poder hablar con nuestro agente de IA acá 🤖";
 
-### Diferencia con IA Tradicional
+async function getMockReply(): Promise<string> {
+  await new Promise((resolve) => setTimeout(resolve, MOCK_REPLY_DELAY_MS));
+  return MOCK_REPLY_TEXT;
+}
 
-- **IA Tradicional**: Responde a inputs, genera outputs. Requiere orquestación humana.
-- **Agentic IA**: Define su propio plan, ejecuta tareas, se adapta a resultados, aprende del contexto.
+export const ChatInbox = () => {
+  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
 
-### Características Clave
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
+  }, [messages]);
 
-1. **Autonomía**: Toma decisiones sin esperar aprobación
-2. **Persistencia**: Mantiene estado y contexto entre interacciones
-3. **Adaptabilidad**: Se ajusta a cambios en el ambiente
-4. **Razonamiento**: Planifica múltiples pasos para resolver problemas
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const text = input.trim();
+    if (!text || sending) return;
 
-Placeholder para secciones futuras con más detalle técnico...
-    `.trim(),
-  },
-  {
-    id: "para-tu-negocio",
-    label: "For Your Business",
-    labelEs: "Para tu negocio",
-    content: `
-## Por qué Agentic IA es importante para tu negocio
+    setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "user", text }]);
+    setInput("");
+    setSending(true);
 
-La automatización de procesos complejos puede ahorrar tiempo y recursos significativos.
+    const replyText = await getMockReply();
+    setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "bot", text: replyText }]);
+    setSending(false);
+  };
 
-### Beneficios
+  return (
+    <div className="flex flex-col flex-1 min-h-0 max-w-2xl w-full mx-auto px-4 pb-4">
+      <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-3 py-4">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={
+              message.role === "user"
+                ? "self-end bg-cyan-500 text-white rounded-2xl rounded-br-sm px-4 py-2 max-w-[80%]"
+                : "self-start bg-gray-800 text-gray-100 rounded-2xl rounded-bl-sm px-4 py-2 max-w-[80%]"
+            }
+          >
+            {message.text}
+          </div>
+        ))}
+      </div>
 
-- **Eficiencia**: Automatiza procesos que toman horas
-- **Escalabilidad**: Maneja volúmenes crecientes sin recursos adicionales
-- **Consistencia**: Ejecuta tareas sin fatiga humana
-- **Costo**: ROI alto en procesos repetitivos
-
-### Casos de uso en Seguridad
-
-- Monitoreo automático de vulnerabilidades
-- Análisis de logs en tiempo real
-- Generación de reportes de compliance
-- Respuesta automática a incidentes
-
-Placeholder para secciones futuras con más ejemplos...
-    `.trim(),
-  },
-  {
-    id: "metodologia",
-    label: "My Methodology",
-    labelEs: "Mi metodología",
-    content: `
-## Cómo implemento Agentic IA
-
-Mi diferenciador es combinar IA con expertise en seguridad, asegurando que cada agente:
-
-1. **Entiende el contexto de seguridad** de tu organización
-2. **Respeta restricciones** y políticas existentes
-3. **Proporciona auditoría completa** de sus acciones
-4. **Se integra** con tus sistemas actuales
-
-### Proceso
-
-1. Análisis de procesos actuales
-2. Diseño de agentes específicos
-3. Integración con infraestructura
-4. Testing exhaustivo
-5. Monitoreo y optimización
-
-Placeholder para secciones futuras con diagramas...
-    `.trim(),
-  },
-  {
-    id: "casos-de-uso",
-    label: "Use Cases",
-    labelEs: "Casos de uso",
-    content: `
-## Casos de uso concretos
-
-### 1. Agente de Análisis de Logs
-Monitorea logs de seguridad 24/7, identifica patrones anómalos, genera alertas.
-
-**Impacto**: Reducción de MTTR (Mean Time To Respond) de horas a minutos.
-
-### 2. Agente de Reportes
-Genera reportes de compliance automáticamente según estándares ISO, PCI-DSS, etc.
-
-**Impacto**: Ahorro de 80% del tiempo en reporte manual.
-
-### 3. Agente de Reconocimiento
-Realiza reconocimiento automático de infraestructura, documenta cambios.
-
-**Impacto**: Visibilidad completamente actualizada de assets.
-
-Placeholder para secciones futuras con más casos...
-    `.trim(),
-  },
-  {
-    id: "pruebalo",
-    label: "Try It",
-    labelEs: "Pruébalo",
-    content: `
-## Prueba Agentic IA
-
-Aquí puedes interactuar con un demo del agente (próximamente).
-
-### Demo: Agente de Análisis
-Carga logs de ejemplo y ve cómo el agente analiza e identifica patrones.
-
-[Placeholder para demo interactiva]
-
-O mira un walkthrough completo del sistema en acción.
-
-[Placeholder para video]
-    `.trim(),
-  },
-];
+      <form onSubmit={handleSubmit} className="flex gap-2 border-t border-gray-800 pt-4">
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Escribí tu mensaje..."
+          className="flex-1"
+        />
+        <Button type="submit" disabled={sending}>
+          Enviar
+        </Button>
+      </form>
+    </div>
+  );
+};
 ```
 
-## Step 2: Commit
+- [ ] **Step 2: Verify with TypeScript**
+
+Run: `npx tsc --noEmit`
+Expected: no output.
+
+- [ ] **Step 3: Commit**
 
 ```bash
-git add src/content/agentic-ia.ts
-git commit -m "feat: add Agentic IA content structure with 5 tabs"
+git add src/components/sections/ChatInbox.tsx
+git commit -m "feat: add ChatInbox mock chat component"
 ```
+
+---
+

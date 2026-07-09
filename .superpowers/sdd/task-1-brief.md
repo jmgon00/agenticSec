@@ -1,141 +1,127 @@
-# Task 1: Create Header Component
+## Task 1: Collapse Header to a hamburger-only nav with a slide-in `MobileMenu`
 
 **Files:**
-- Create: `src/components/sections/Header.tsx`
-- Modify: `src/app/layout.tsx`
+- Create: `src/components/sections/MobileMenu.tsx`
+- Modify: `src/components/sections/Header.tsx` (full rewrite of the component body)
 
 **Interfaces:**
-- Consumes: None (uses Next.js routing)
-- Produces: `<Header />` component with navigation links to `/`, `/portfolio`, `/presupuesto`, `/agentic-ia`
+- Produces: `MobileMenu` component with props `{ links: { href: string; label: string }[]; open: boolean; onClose: () => void }`, named export `MobileMenu`.
+- Consumes: none (this task has no dependency on other tasks).
 
-## Step 1: Create Header component
+- [ ] **Step 1: Create `MobileMenu.tsx`**
 
-Create `src/components/sections/Header.tsx`:
+```tsx
+"use client";
 
-```typescript
+import Link from "next/link";
+
+interface MobileMenuLink {
+  href: string;
+  label: string;
+}
+
+interface MobileMenuProps {
+  links: MobileMenuLink[];
+  open: boolean;
+  onClose: () => void;
+}
+
+export const MobileMenu = ({ links, open, onClose }: MobileMenuProps) => {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div
+        className="absolute inset-0 bg-black/60"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <nav className="absolute top-0 right-0 h-full w-64 bg-gray-950 border-l border-gray-800 flex flex-col p-6 gap-2">
+        <button
+          type="button"
+          aria-label="Cerrar menú"
+          className="self-end text-white hover:text-cyan-400 mb-4 text-2xl leading-none transition-colors duration-200"
+          onClick={onClose}
+        >
+          ×
+        </button>
+        {links.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="text-gray-300 hover:text-cyan-400 px-2 py-3 rounded transition-colors duration-200 text-lg"
+            onClick={onClose}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </nav>
+    </div>
+  );
+};
+```
+
+- [ ] **Step 2: Rewrite `Header.tsx` to drop the inline desktop/mobile nav lists and use `MobileMenu`**
+
+Replace the entire file content with:
+
+```tsx
 "use client";
 
 import Link from "next/link";
 import { useState } from "react";
+import { MobileMenu } from "./MobileMenu";
+
+const navLinks = [
+  { href: "/", label: "Inicio" },
+  { href: "/portfolio", label: "Portfolio" },
+  { href: "/presupuesto", label: "Presupuesto" },
+  { href: "/agentes", label: "Agentes 🤖" },
+  { href: "/agentic-ia", label: "Agentic IA" },
+  { href: "/security-services", label: "Servicios de Seguridad" },
+];
 
 export const Header = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const navLinks = [
-    { href: "/", label: "Inicio" },
-    { href: "/portfolio", label: "Portfolio" },
-    { href: "/presupuesto", label: "Presupuesto" },
-    { href: "/agentic-ia", label: "Agentic IA" },
-  ];
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-gray-950 border-b border-gray-800 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="text-white font-bold text-xl">
-            JMG
+          <Link href="/" className="text-white hover:text-cyan-400 font-bold text-xl transition-colors duration-200">
+            AgenticSec
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-white"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            type="button"
+            aria-label="Abrir menú"
+            className="text-white hover:text-cyan-400 transition-colors duration-200"
+            onClick={() => setMenuOpen(true)}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         </div>
-
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <nav className="md:hidden pb-4 flex flex-col gap-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-gray-300 hover:text-white px-2 py-2 rounded transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        )}
       </div>
+
+      <MobileMenu links={navLinks} open={menuOpen} onClose={() => setMenuOpen(false)} />
     </header>
   );
 };
 ```
 
-## Step 2: Update layout.tsx to include Header
+- [ ] **Step 3: Verify with TypeScript**
 
-Modify `src/app/layout.tsx`:
+Run: `npx tsc --noEmit`
+Expected: no output (clean, same as before this task).
 
-```typescript
-import type { Metadata } from "next";
-import "./globals.css";
-import { SITE_CONFIG } from "@/content/config";
-import { Header } from "@/components/sections/Header";
-import { Footer } from "@/components/sections/Footer";
-
-export const metadata: Metadata = {
-  title: SITE_CONFIG.title,
-  description: SITE_CONFIG.description,
-  authors: [{ name: SITE_CONFIG.author }],
-  openGraph: {
-    title: SITE_CONFIG.title,
-    description: SITE_CONFIG.description,
-    type: "website",
-    url: process.env.NEXT_PUBLIC_SITE_URL,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_CONFIG.title,
-    description: SITE_CONFIG.description,
-  },
-};
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="es">
-      <body className="bg-gray-900 text-white">
-        <Header />
-        <main className="pt-16">{children}</main>
-        <Footer />
-      </body>
-    </html>
-  );
-}
-```
-
-## Step 3: Test header renders on landing page
-
-Run: `npm run dev`
-Visit: `http://localhost:3000`
-Expected: Header visible at top with logo and nav links
-
-## Step 4: Commit
+- [ ] **Step 4: Commit**
 
 ```bash
-git add src/components/sections/Header.tsx src/app/layout.tsx
-git commit -m "feat: add persistent header navigation across all pages"
+git add src/components/sections/MobileMenu.tsx src/components/sections/Header.tsx
+git commit -m "feat: collapse header nav to a hamburger + slide-in menu on all pages"
 ```
+
+---
+

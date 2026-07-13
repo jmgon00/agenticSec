@@ -49,7 +49,7 @@ export const consultationFormSchema = z.object({
     .min(2, "El nombre de la empresa debe tener al menos 2 caracteres")
     .max(100, "El nombre de la empresa no puede exceder 100 caracteres"),
   companySize: z.enum(["startup", "pyme", "enterprise", "other"]),
-  serviceInterest: z.enum(["web-analysis", "infrastructure", "compliance", "ia-inquiry", "other"]),
+  serviceInterest: z.enum(["basic-audit", "web-analysis", "infrastructure", "compliance", "ia-inquiry", "other"]),
   message: z
     .string()
     .min(10, "El mensaje debe tener al menos 10 caracteres")

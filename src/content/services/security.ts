@@ -2,6 +2,24 @@ import { SecurityService } from "@/lib/types/portfolio";
 
 export const SECURITY_SERVICES: SecurityService[] = [
   {
+    id: "basic-audit",
+    name: "Auditoría Básica de Seguridad Web",
+    icon: "🩺",
+    shortDescription: "Diagnóstico rápido y accesible del nivel de seguridad de tu sitio",
+    fullDescription: "Un primer chequeo de seguridad pensado para que sepas, en pocos días, cuál es el estado real de tu sitio web. Revisamos los puntos más comunes de exposición y te entregamos un informe claro con lo que hay que corregir primero.",
+    whatIncludes: [
+      "Revisión de headers de seguridad (CSP, HSTS, X-Frame-Options, etc.)",
+      "Evaluación de configuración TLS/SSL y validez del certificado",
+      "Detección de archivos y directorios expuestos (.env, .git, backups)",
+      "Identificación de versiones de software y vulnerabilidades conocidas (CVEs)",
+      "Revisión de configuración de cookies de sesión",
+      "Verificación de registros de email (SPF, DKIM, DMARC)",
+      "Informe con hallazgos priorizados por severidad y recomendaciones"
+    ],
+    forWho: "Dueños de sitios web y PyMEs que quieren un primer diagnóstico rápido de su nivel de seguridad, como punto de partida antes de una auditoría más profunda",
+    price: null
+  },
+  {
     id: "web-analysis",
     name: "Análisis de Vulnerabilidades en Aplicaciones Web",
     icon: "🔍",

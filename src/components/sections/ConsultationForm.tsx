@@ -208,6 +208,7 @@ export const ConsultationForm = ({
         value={formData.serviceInterest}
         onChange={handleChange}
         options={[
+          { value: "basic-audit", label: "Auditoría Básica de Seguridad" },
           { value: "web-analysis", label: "Análisis de Vulnerabilidades Web" },
           { value: "infrastructure", label: "Auditoría de Infraestructura" },
           { value: "compliance", label: "Auditoría de Compliance" },

@@ -10,6 +10,19 @@ import { SECURITY_CASES } from "@/content/portfolio/security-cases";
 export default function SecurityServicesPage() {
   const [expandedService, setExpandedService] = useState<string | null>(null);
 
+  const basicAuditService = SECURITY_SERVICES.find((s) => s.id === "basic-audit");
+  const otherServices = SECURITY_SERVICES.filter((s) => s.id !== "basic-audit");
+
+  const [selectedPoints, setSelectedPoints] = useState<boolean[]>(
+    basicAuditService?.whatIncludes.map(() => true) ?? []
+  );
+
+  const togglePoint = (index: number) => {
+    setSelectedPoints((prev) =>
+      prev.map((value, i) => (i === index ? !value : value))
+    );
+  };
+
   const toggleService = (serviceId: string) => {
     setExpandedService(expandedService === serviceId ? null : serviceId);
   };
@@ -30,7 +43,56 @@ export default function SecurityServicesPage() {
           </h2>
 
           <div className="space-y-6">
-            {SECURITY_SERVICES.map((service) => (
+            {/* Basic Audit — featured, interactive card (real scan request, not just an example) */}
+            {basicAuditService && (
+              <div className="rounded-lg border-2 border-cyan-500/60 bg-gradient-to-br from-gray-900 to-gray-800 p-8">
+                <div className="flex items-start gap-6">
+                  <div className="text-5xl flex-shrink-0">{basicAuditService.icon}</div>
+
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-3 mb-3">
+                      <h3 className="text-2xl font-bold text-white">
+                        {basicAuditService.name}
+                      </h3>
+                      <span className="text-xs font-semibold uppercase tracking-wide text-cyan-400 border border-cyan-500/60 rounded-full px-3 py-1">
+                        Solicitá tu escaneo
+                      </span>
+                    </div>
+                    <p className="text-gray-300 mb-6">
+                      {basicAuditService.fullDescription}
+                    </p>
+
+                    <h4 className="text-lg font-bold text-white mb-3">
+                      Elegí los puntos que querés que escaneemos
+                    </h4>
+                    <ul className="space-y-3 mb-6">
+                      {basicAuditService.whatIncludes.map((item, index) => (
+                        <li key={index}>
+                          <label className="flex items-start gap-3 text-gray-300 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedPoints[index] ?? true}
+                              onChange={() => togglePoint(index)}
+                              className="mt-1 h-4 w-4 flex-shrink-0 rounded border-gray-600 bg-gray-800 text-cyan-500 focus:ring-cyan-500"
+                            />
+                            <span>{item}</span>
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div>
+                      <h4 className="text-lg font-bold text-white mb-3">
+                        ¿Para quién es?
+                      </h4>
+                      <p className="text-gray-300">{basicAuditService.forWho}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {otherServices.map((service) => (
               <div
                 key={service.id}
                 className="rounded-lg border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-8 transition-all duration-300"
@@ -149,7 +211,7 @@ export default function SecurityServicesPage() {
       <section className="bg-gray-950 py-16 px-4">
         <div className="max-w-2xl mx-auto">
           <ConsultationForm
-            defaultService="web-analysis"
+            defaultService="basic-audit"
             title="Solicita tu Consulta de Seguridad"
             submitText="Solicitar Presupuesto"
           />

@@ -39,6 +39,6 @@ export interface ConsultationFormData {
   phone: string;
   company: string;
   companySize: "startup" | "pyme" | "enterprise" | "other";
-  serviceInterest: "web-analysis" | "infrastructure" | "compliance" | "ia-inquiry" | "other";
+  serviceInterest: "basic-audit" | "web-analysis" | "infrastructure" | "compliance" | "ia-inquiry" | "other";
   message: string;
 }

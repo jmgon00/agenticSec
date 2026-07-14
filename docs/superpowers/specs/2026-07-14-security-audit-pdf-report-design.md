@@ -21,7 +21,7 @@ Este feature agrega un botón "Descargar reporte (PDF)" que aparece junto a los 
    - Body: `{ target: string, summary: string, findings: CategoryCheckResult[] }` — mismos datos que el cliente ya tiene en memoria tras el scan.
    - Valida el body con `zod` (schema derivado de los tipos de `src/lib/agents/types.ts`).
    - Renderiza el PDF con `renderToBuffer` de `@react-pdf/renderer` usando un documento definido en `src/lib/agents/scan/report-pdf.tsx`.
-   - Responde con `Content-Type: application/pdf` y `Content-Disposition: attachment; filename="reporte-seguridad-<target-sanitizado>-<YYYY-MM-DD>.pdf"`.
+   - Responde con `Content-Type: application/pdf` y `Content-Disposition: attachment; filename="reporte-seguridad-<target-sanitizado>-<YYYY-MM-DD>.pdf"`, donde `<target-sanitizado>` es el `target` sin protocolo (`https://`) y con cualquier carácter que no sea alfanumérico, punto o guion reemplazado por `-` (para evitar romper el header `Content-Disposition`).
    - No consulta ni escribe en la base de datos, no repite el scan, no valida SSRF de nuevo (el `target` ya fue validado y auditado en el scan original; acá solo se usa como texto para el nombre de archivo y el header del PDF).
 
 2. **Cliente (`AgentScanRunner.tsx`):**

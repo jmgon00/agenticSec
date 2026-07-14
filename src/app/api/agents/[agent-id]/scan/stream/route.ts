@@ -1,9 +1,13 @@
 import { NextRequest } from "next/server"
 import { prisma } from "@/lib/db"
-import { checkRateLimit } from "@/lib/rate-limit"
 import { assertSafeTarget, UnsafeTargetError } from "@/lib/agents/scan/ssrf-guard"
 import { runSecurityScan } from "@/lib/agents/scan/orchestrator"
 import type { Prisma } from "@prisma/client"
+
+export const maxDuration = 300
+
+const SCAN_RATE_LIMIT_MAX = 3
+const SCAN_RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000
 
 export async function POST(
   request: NextRequest,
@@ -25,8 +29,13 @@ export async function POST(
       )
     }
 
-    const rateLimitCheck = checkRateLimit(`scan:${userEmail}`)
-    if (!rateLimitCheck.allowed) {
+    const scanCount = await prisma.securityScanRun.count({
+      where: {
+        userEmail,
+        createdAt: { gte: new Date(Date.now() - SCAN_RATE_LIMIT_WINDOW_MS) },
+      },
+    })
+    if (scanCount >= SCAN_RATE_LIMIT_MAX) {
       return new Response(
         JSON.stringify({ error: "Alcanzaste el límite de auditorías por hoy" }),
         { status: 429, headers: { "Content-Type": "application/json" } }

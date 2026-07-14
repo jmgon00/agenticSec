@@ -130,7 +130,27 @@ function runCheck(
   }
 }
 
+const RUN_TIMEOUT_MS = 250_000
+
 export async function runSecurityScan(
+  target: { url: string; hostname: string },
+  onProgress: (event: ScanProgressEvent) => void
+): Promise<ScanOutcome> {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutHandle = setTimeout(() => {
+      reject(new Error("La auditoría superó el tiempo máximo permitido"))
+    }, RUN_TIMEOUT_MS)
+  })
+
+  try {
+    return await Promise.race([runSecurityScanInner(target, onProgress), timeoutPromise])
+  } finally {
+    clearTimeout(timeoutHandle)
+  }
+}
+
+async function runSecurityScanInner(
   target: { url: string; hostname: string },
   onProgress: (event: ScanProgressEvent) => void
 ): Promise<ScanOutcome> {
@@ -140,6 +160,8 @@ export async function runSecurityScan(
   const messages: Anthropic.MessageParam[] = [
     { role: "user", content: `Auditá ${target.url}` },
   ]
+
+  const collectedResults = new Map<string, CategoryCheckResult>()
 
   const MAX_TOOL_TURNS = 5
   let turn = 0
@@ -172,6 +194,7 @@ export async function runSecurityScan(
       try {
         const result = await runCheck(category, target.hostname, target.url)
         onProgress({ type: "check_completed", category, result })
+        collectedResults.set(CATEGORY_LABELS[category] ?? category, result)
         toolResults.push({
           type: "tool_result",
           tool_use_id: block.id,
@@ -194,6 +217,7 @@ export async function runSecurityScan(
           ],
         }
         onProgress({ type: "check_completed", category, result: failedResult })
+        collectedResults.set(CATEGORY_LABELS[category] ?? category, failedResult)
         toolResults.push({
           type: "tool_result",
           tool_use_id: block.id,
@@ -227,7 +251,7 @@ export async function runSecurityScan(
 
   const finalResponse = await client.messages.create({
     model,
-    max_tokens: 4096,
+    max_tokens: 8192,
     system: systemPrompt,
     thinking: { type: "adaptive" },
     messages,
@@ -236,6 +260,12 @@ export async function runSecurityScan(
     },
   })
 
+  if (finalResponse.stop_reason === "max_tokens") {
+    throw new Error(
+      "La respuesta final del agente se truncó (max_tokens); no se pudo generar el reporte completo"
+    )
+  }
+
   const textBlock = finalResponse.content.find(
     (b): b is Anthropic.TextBlock => b.type === "text"
   )
@@ -243,5 +273,17 @@ export async function runSecurityScan(
     throw new Error("El agente no devolvió un resultado final")
   }
 
-  return JSON.parse(textBlock.text) as ScanOutcome
+  const outcome = JSON.parse(textBlock.text) as ScanOutcome
+
+  const presentCategories = new Set(outcome.findings.map((f) => f.category))
+  for (const label of Object.values(CATEGORY_LABELS)) {
+    if (!presentCategories.has(label)) {
+      const fallback = collectedResults.get(label)
+      if (fallback) {
+        outcome.findings.push(fallback)
+      }
+    }
+  }
+
+  return outcome
 }

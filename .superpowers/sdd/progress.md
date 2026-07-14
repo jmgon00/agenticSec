@@ -12,7 +12,7 @@
 - [x] Task 2: Scoring engine — implemented (2b3e1d4), review clean (28/28 rules verified rule-by-rule)
 - [x] Task 3: Questions metadata — implemented (77bfe53), review clean (28/28 ids + option sets verified)
 - [x] Task 4: Orchestrator — implemented (3d577b3), review clean (deterministic pass-through verified)
-- [ ] Task 5: Assessment run endpoint
+- [x] Task 5: Assessment run endpoint — implemented (5619f2f), review clean (zod schema field-checked against Tasks 2/3)
 - [ ] Task 6: Assessment report endpoint
 - [ ] Task 7: Extract ScanResultsView + refactor AgentScanRunner
 - [ ] Task 8: AgentAssessmentRunner component
@@ -21,4 +21,5 @@
 
 ## Minor findings log (not fixed, informational)
 
-(none yet)
+- Task 5's 400 test only covers a missing field, not an invalid enum value — low risk since the schema was verified field-by-field in review, but weaker regression coverage against future schema edits.
+- Task 5's test file has `as any` casts + one unused-var from destructure-to-omit, tripping `@typescript-eslint/no-explicit-any` — matches a pre-existing pattern in `ssrf-guard.test.ts`, not new debt.

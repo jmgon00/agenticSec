@@ -98,6 +98,15 @@ const OUTPUT_SCHEMA = {
   additionalProperties: false,
 } as const
 
+const CATEGORY_LABELS: Record<string, string> = {
+  check_headers: "Headers",
+  check_tls: "TLS/SSL",
+  check_exposed_files: "Archivos Expuestos",
+  check_version_leak: "Versiones/CVEs",
+  check_cookies: "Cookies/Auth",
+  check_dns_email: "DNS/Email",
+}
+
 function runCheck(
   toolName: string,
   hostname: string,
@@ -169,11 +178,26 @@ export async function runSecurityScan(
           content: JSON.stringify(result),
         })
       } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        const failedResult: CategoryCheckResult = {
+          category: CATEGORY_LABELS[category] ?? category,
+          points: [
+            {
+              point: "Ejecución del check",
+              result: "Error durante la ejecución",
+              severity: "N/A",
+              evidence: message,
+              recommendation:
+                "Reintentar la auditoría más tarde o revisar manualmente esta categoría",
+              estado: "Pendiente",
+            },
+          ],
+        }
+        onProgress({ type: "check_completed", category, result: failedResult })
         toolResults.push({
           type: "tool_result",
           tool_use_id: block.id,
-          content: `Error ejecutando el check: ${err instanceof Error ? err.message : String(err)}`,
-          is_error: true,
+          content: JSON.stringify(failedResult),
         })
       }
     }
@@ -181,11 +205,25 @@ export async function runSecurityScan(
     messages.push({ role: "user", content: toolResults })
   }
 
-  messages.push({
-    role: "user",
-    content:
-      "Ya llamaste todas las tools necesarias. Devolveme ahora el resultado final estructurado con findings y summary.",
-  })
+  const finalInstructionText =
+    "Ya llamaste todas las tools necesarias. Devolveme ahora el resultado final estructurado con findings y summary."
+
+  const lastMessage = messages[messages.length - 1]
+  if (lastMessage && lastMessage.role === "user") {
+    // The loop exited by hitting MAX_TOOL_TURNS while stop_reason was still
+    // "tool_use", so the last message pushed is the tool_results user message.
+    // Append to it instead of pushing a second consecutive user message.
+    if (Array.isArray(lastMessage.content)) {
+      lastMessage.content.push({ type: "text", text: finalInstructionText })
+    } else {
+      lastMessage.content = [
+        { type: "text", text: lastMessage.content },
+        { type: "text", text: finalInstructionText },
+      ]
+    }
+  } else {
+    messages.push({ role: "user", content: finalInstructionText })
+  }
 
   const finalResponse = await client.messages.create({
     model,

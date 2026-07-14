@@ -1,186 +1,201 @@
-### Task 3: Botón de descarga en `AgentScanRunner.tsx`
+### Task 3: Metadata de preguntas para la UI
 
 **Files:**
-- Modify: `src/components/sections/AgentScanRunner.tsx:1-18` (unificación de tipos), `:48-127` (estado + handlers), `:195-228` (JSX de resultados)
+- Create: `src/lib/agents/assessment/questions.ts`
 
 **Interfaces:**
-- Consumes: `POST /api/agents/{agent.id}/scan/report` de Task 2 (body `{ target, summary, findings }`, respuesta binaria PDF o JSON de error).
-- Produces: nada nuevo para otras tasks — es la punta visible del feature.
+- Consumes: `AssessmentAnswers` de `@/lib/agents/types` (Task 1), solo para tipar `id` de cada pregunta.
+- Produces: `export const ASSESSMENT_CATEGORIES: AssessmentCategory[]` — usado por Task 8 (`AgentAssessmentRunner.tsx`).
 
-- [ ] **Step 1: Unificar los tipos duplicados**
+- [ ] **Step 1: Crear `questions.ts`**
 
-En `src/components/sections/AgentScanRunner.tsx`, reemplazar las líneas 1-18:
+Crear `src/lib/agents/assessment/questions.ts`:
 
-```tsx
-"use client"
+```ts
+import type { AssessmentAnswers } from "@/lib/agents/types"
 
-import { useState } from "react"
-import { Agent } from "@/lib/agents/types"
-
-interface ScanPoint {
-  point: string
-  result: string
-  severity: string
-  evidence: string
-  recommendation: string
-  estado: "Aprobado" | "Fallido" | "Pendiente" | "No aplica"
+export interface AssessmentQuestion {
+  id: keyof AssessmentAnswers
+  label: string
+  options: { value: string; label: string }[]
 }
 
-interface CategoryCheckResult {
-  category: string
-  points: ScanPoint[]
+export interface AssessmentCategory {
+  key: string
+  label: string
+  questions: AssessmentQuestion[]
 }
+
+const SI_NO = [
+  { value: "si", label: "Sí" },
+  { value: "no", label: "No" },
+]
+
+const SI_NO_NO_SE = [
+  { value: "si", label: "Sí" },
+  { value: "no", label: "No" },
+  { value: "no_se", label: "No sé" },
+]
+
+export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
+  {
+    key: "identidad",
+    label: "Identidad Digital",
+    questions: [
+      { id: "identidadBuscasteNombre", label: "¿Buscaste tu nombre completo en Google alguna vez?", options: SI_NO },
+      { id: "identidadDatosIndexados", label: "¿Aparecen resultados de tu teléfono, DNI o dirección en buscadores?", options: SI_NO_NO_SE },
+      { id: "identidadPerfilesViejos", label: "¿Tenés perfiles en redes que ya no usás pero siguen activos o públicos?", options: SI_NO_NO_SE },
+      { id: "identidadUsuarioRepetido", label: "¿Usás el mismo nombre de usuario (handle) en varios servicios?", options: SI_NO },
+    ],
+  },
+  {
+    key: "cuentas",
+    label: "Cuentas y Autenticación",
+    questions: [
+      { id: "cuentasMfaEmail", label: "¿Tenés activado el doble factor de autenticación (MFA) en tu correo principal?", options: SI_NO },
+      {
+        id: "cuentasMfaRedes",
+        label: "¿Tenés MFA activado en tus redes sociales principales?",
+        options: [
+          { value: "si", label: "Sí" },
+          { value: "parcial", label: "Parcialmente" },
+          { value: "no", label: "No" },
+        ],
+      },
+      {
+        id: "cuentasCantidad",
+        label: "¿Sabés aproximadamente cuántas cuentas online tenés creadas?",
+        options: [
+          { value: "menos_20", label: "Menos de 20" },
+          { value: "20_80", label: "Entre 20 y 80" },
+          { value: "mas_80", label: "Más de 80" },
+          { value: "no_se", label: "No sé" },
+        ],
+      },
+      { id: "cuentasRevisoTerceros", label: "¿Revisaste alguna vez qué apps/servicios de terceros tienen acceso a tu cuenta de Google/Facebook?", options: SI_NO },
+    ],
+  },
+  {
+    key: "passwords",
+    label: "Contraseñas",
+    questions: [
+      { id: "passwordsGestor", label: "¿Usás un gestor de contraseñas?", options: SI_NO },
+      { id: "passwordsReutiliza", label: "¿Reutilizás la misma contraseña en más de un servicio importante?", options: SI_NO_NO_SE },
+      { id: "passwordsLargas", label: "¿Tus contraseñas principales tienen más de 12 caracteres?", options: SI_NO_NO_SE },
+      { id: "passwordsCambioEmail", label: "¿Cambiaste tu contraseña de email en el último año?", options: SI_NO_NO_SE },
+    ],
+  },
+  {
+    key: "redes",
+    label: "Redes Sociales",
+    questions: [
+      {
+        id: "redesPerfilPublico",
+        label: "¿Tu perfil principal (Instagram/Facebook/X) es público?",
+        options: [
+          { value: "si", label: "Sí" },
+          { value: "mixto", label: "Depende de la red" },
+          { value: "no", label: "No" },
+        ],
+      },
+      {
+        id: "redesFotosSensibles",
+        label: "¿Publicás fotos donde se vea el frente de tu casa, la patente del auto o tu ubicación en tiempo real?",
+        options: [
+          { value: "si", label: "Sí" },
+          { value: "a_veces", label: "A veces" },
+          { value: "no", label: "No" },
+        ],
+      },
+      { id: "redesMuestraTrabajo", label: "¿Tu perfil muestra dónde trabajás o estudiás?", options: SI_NO },
+      { id: "redesGeolocalizacion", label: "¿Tenés la geolocalización activada en tus publicaciones?", options: SI_NO_NO_SE },
+    ],
+  },
+  {
+    key: "dispositivos",
+    label: "Dispositivos",
+    questions: [
+      {
+        id: "dispositivosBloqueo",
+        label: "¿Tus dispositivos principales (celular, notebook) tienen PIN, contraseña o biometría?",
+        options: [
+          { value: "todos", label: "Todos" },
+          { value: "algunos", label: "Algunos" },
+          { value: "ninguno", label: "Ninguno" },
+        ],
+      },
+      { id: "dispositivosCifrado", label: "¿Tenés el cifrado de disco activado (BitLocker/FileVault/cifrado nativo de Android-iOS)?", options: SI_NO_NO_SE },
+      { id: "dispositivosActualizados", label: "¿Tus dispositivos están al día con las actualizaciones del sistema operativo?", options: SI_NO_NO_SE },
+      {
+        id: "dispositivosAntivirus",
+        label: "¿Tenés un antivirus o protección activa en tu PC?",
+        options: [
+          { value: "si", label: "Sí" },
+          { value: "no", label: "No" },
+          { value: "no_aplica", label: "No aplica" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "red_domestica",
+    label: "Red Doméstica",
+    questions: [
+      {
+        id: "redRouterProtocolo",
+        label: "¿Tu router usa WPA3 o al menos WPA2 (no WEP ni sin contraseña)?",
+        options: [
+          { value: "wpa3", label: "WPA3" },
+          { value: "wpa2", label: "WPA2" },
+          { value: "wep_o_abierta", label: "WEP o sin contraseña" },
+          { value: "no_se", label: "No sé" },
+        ],
+      },
+      { id: "redPasswordDefault", label: "¿Cambiaste la contraseña por defecto del router?", options: SI_NO_NO_SE },
+      { id: "redWpsDesactivado", label: "¿Tenés el WPS desactivado en tu router?", options: SI_NO_NO_SE },
+      {
+        id: "redIotSeparada",
+        label: "¿Tus dispositivos IoT (cámaras, enchufes inteligentes) están en una red separada de tus dispositivos principales?",
+        options: [
+          { value: "si", label: "Sí" },
+          { value: "no", label: "No" },
+          { value: "no_tiene_iot", label: "No tengo IoT" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "ingenieria_social",
+    label: "Ingeniería Social",
+    questions: [
+      { id: "ingSocialFechaNacimiento", label: "¿Publicás tu fecha de nacimiento completa en redes sociales?", options: SI_NO },
+      { id: "ingSocialPreguntasSeguridad", label: "¿Tus respuestas de seguridad (nombre de mascota, escuela, etc.) se pueden deducir de tus publicaciones públicas?", options: SI_NO_NO_SE },
+      { id: "ingSocialDatosFamiliares", label: "¿Compartís públicamente el nombre de tu pareja, hijos o familiares directos junto con datos identificables?", options: SI_NO },
+      {
+        id: "ingSocialContactosDesconocidos",
+        label: "¿Aceptás solicitudes de conexión o amistad de gente que no conocés?",
+        options: [
+          { value: "si", label: "Sí" },
+          { value: "a_veces", label: "A veces" },
+          { value: "no", label: "No" },
+        ],
+      },
+    ],
+  },
+]
 ```
 
-por:
-
-```tsx
-"use client"
-
-import { useState } from "react"
-import { Agent, CategoryCheckResult } from "@/lib/agents/types"
-```
-
-- [ ] **Step 2: Agregar el estado de descarga**
-
-En la misma componente, reemplazar la línea:
-
-```tsx
-  const [summary, setSummary] = useState("")
-```
-
-por:
-
-```tsx
-  const [summary, setSummary] = useState("")
-  const [downloadStatus, setDownloadStatus] = useState<"idle" | "generating" | "error">("idle")
-```
-
-- [ ] **Step 3: Agregar el handler de descarga y resetear el estado en `handleReset`**
-
-Reemplazar la función `handleReset` (líneas 121-127):
-
-```tsx
-  const handleReset = () => {
-    setFindings(null)
-    setSummary("")
-    setTarget("")
-    setAuthorized(false)
-    setStatus(initialStatus())
-  }
-```
-
-por:
-
-```tsx
-  const handleReset = () => {
-    setFindings(null)
-    setSummary("")
-    setTarget("")
-    setAuthorized(false)
-    setStatus(initialStatus())
-    setDownloadStatus("idle")
-  }
-
-  const handleDownloadReport = async () => {
-    if (!findings) return
-
-    setDownloadStatus("generating")
-    try {
-      const response = await fetch(`/api/agents/${agent.id}/scan/report`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ target, summary, findings }),
-      })
-
-      if (!response.ok) {
-        setDownloadStatus("error")
-        return
-      }
-
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
-      const cleanTarget = target.replace(/^https?:\/\//, "").replace(/[^a-zA-Z0-9.-]/g, "-")
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `reporte-seguridad-${cleanTarget}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      URL.revokeObjectURL(url)
-      setDownloadStatus("idle")
-    } catch (err) {
-      console.error("Report download error:", err)
-      setDownloadStatus("error")
-    }
-  }
-```
-
-- [ ] **Step 4: Agregar el botón en el bloque de resultados**
-
-Reemplazar el inicio del bloque de resultados (líneas 195-197):
-
-```tsx
-      {findings && (
-        <div className="space-y-6">
-          <div className="text-gray-200 leading-relaxed whitespace-pre-line">{summary}</div>
-```
-
-por:
-
-```tsx
-      {findings && (
-        <div className="space-y-6">
-          <div className="text-gray-200 leading-relaxed whitespace-pre-line">{summary}</div>
-
-          <div>
-            <button
-              onClick={handleDownloadReport}
-              disabled={downloadStatus === "generating"}
-              className="px-4 py-2 bg-gray-800 border border-cyan-400 text-cyan-400 font-semibold rounded-lg hover:bg-cyan-400 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
-            >
-              {downloadStatus === "generating" ? "Generando PDF..." : "Descargar reporte (PDF)"}
-            </button>
-            {downloadStatus === "error" && (
-              <p className="mt-2 text-sm text-red-400">
-                No se pudo generar el PDF. Intentá de nuevo.
-              </p>
-            )}
-          </div>
-```
-
-- [ ] **Step 5: Verificar tipos**
+- [ ] **Step 2: Verificar tipos**
 
 Run: `npx tsc --noEmit -p tsconfig.json`
-Expected: sin errores (el `Record<string, string>` de `ESTADO_STYLE` y el resto del archivo siguen siendo compatibles con el `CategoryCheckResult` importado).
+Expected: sin errores. (Este archivo es solo datos estáticos, no requiere test unitario.)
 
-- [ ] **Step 6: Correr toda la suite (regresión)**
-
-Run: `npm test`
-Expected: PASS — no hay tests de componente para `AgentScanRunner.tsx`, así que esto solo confirma que nada del resto del proyecto se rompió.
-
-- [ ] **Step 7: Verificación manual end-to-end**
-
-1. Levantar el servidor de desarrollo: `npm run dev`
-2. Ir a la página del agente "Auditor de Seguridad con IA" (`/agentes/auditor-de-seguridad-con-ia` o el slug correspondiente).
-3. Ingresar un dominio de prueba propio (o uno de los targets ya autorizados), tildar la casilla de autorización, y correr la auditoría hasta que termine.
-4. Confirmar que aparece el botón "Descargar reporte (PDF)" junto al resumen ejecutivo.
-5. Hacer click. Confirmar que el botón pasa a "Generando PDF..." y luego se descarga un archivo `reporte-seguridad-<target>.pdf`.
-6. Abrir el PDF descargado y confirmar: header con "AgenticSec" y el target auditado, el resumen ejecutivo, cada categoría con sus checks, y los badges de estado con los mismos colores que se ven en pantalla (verde/rojo/amarillo/gris).
-7. Confirmar que el tamaño del archivo descargado es chico (esperado: por debajo de ~100 KB).
-8. Simular un error (por ejemplo, cortar la red desde las DevTools antes de hacer click) y confirmar que aparece el mensaje "No se pudo generar el PDF. Intentá de nuevo." sin romper el resto de la pantalla de resultados.
-
-- [ ] **Step 8: Commit**
+- [ ] **Step 3: Commit**
 
 ```bash
-git add src/components/sections/AgentScanRunner.tsx
-git commit -m "feat: add PDF report download button to the security scan results"
+git add src/lib/agents/assessment/questions.ts
+git commit -m "feat: add question metadata for personal security assessment form"
 ```
 
 ---
 
-## Self-Review Notes
-
-- **Spec coverage:** endpoint server-side con `@react-pdf/renderer` (Task 1-2), branding y colores de badges (Task 1), botón solo tras scan en vivo sin historial (Task 3), manejo de errores cliente/servidor (Task 2 step 3 + Task 3 steps 3-4), sin rate limiting nuevo (no agregado, según spec), nombre de archivo sanitizado (Task 2 `sanitizeFilenamePart` + Task 3 `cleanTarget`) — todos los puntos de la spec tienen una task que los cubre.
-- **Placeholder scan:** sin TBD/TODO; todos los steps incluyen código completo o un procedimiento manual concreto (Task 3 Step 7).
-- **Type consistency:** `ScanReportInput`/`renderScanReportPdf` (Task 1) se consumen sin cambios en Task 2; `CategoryCheckResult` importado de `@/lib/agents/types` es el mismo tipo en los tres archivos tocados.

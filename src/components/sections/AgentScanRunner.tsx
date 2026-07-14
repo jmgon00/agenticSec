@@ -1,21 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Agent } from "@/lib/agents/types"
-
-interface ScanPoint {
-  point: string
-  result: string
-  severity: string
-  evidence: string
-  recommendation: string
-  estado: "Aprobado" | "Fallido" | "Pendiente" | "No aplica"
-}
-
-interface CategoryCheckResult {
-  category: string
-  points: ScanPoint[]
-}
+import { Agent, CategoryCheckResult } from "@/lib/agents/types"
 
 interface AgentScanRunnerProps {
   agent: Agent
@@ -53,6 +39,7 @@ export const AgentScanRunner = ({ agent, userEmail }: AgentScanRunnerProps) => {
   const [error, setError] = useState("")
   const [findings, setFindings] = useState<CategoryCheckResult[] | null>(null)
   const [summary, setSummary] = useState("")
+  const [downloadStatus, setDownloadStatus] = useState<"idle" | "generating" | "error">("idle")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -124,6 +111,40 @@ export const AgentScanRunner = ({ agent, userEmail }: AgentScanRunnerProps) => {
     setTarget("")
     setAuthorized(false)
     setStatus(initialStatus())
+    setDownloadStatus("idle")
+  }
+
+  const handleDownloadReport = async () => {
+    if (!findings) return
+
+    setDownloadStatus("generating")
+    try {
+      const response = await fetch(`/api/agents/${agent.id}/scan/report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target, summary, findings }),
+      })
+
+      if (!response.ok) {
+        setDownloadStatus("error")
+        return
+      }
+
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const cleanTarget = target.replace(/^https?:\/\//, "").replace(/[^a-zA-Z0-9.-]/g, "-")
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `reporte-seguridad-${cleanTarget}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      setDownloadStatus("idle")
+    } catch (err) {
+      console.error("Report download error:", err)
+      setDownloadStatus("error")
+    }
   }
 
   return (
@@ -195,6 +216,21 @@ export const AgentScanRunner = ({ agent, userEmail }: AgentScanRunnerProps) => {
       {findings && (
         <div className="space-y-6">
           <div className="text-gray-200 leading-relaxed whitespace-pre-line">{summary}</div>
+
+          <div>
+            <button
+              onClick={handleDownloadReport}
+              disabled={downloadStatus === "generating"}
+              className="px-4 py-2 bg-gray-800 border border-cyan-400 text-cyan-400 font-semibold rounded-lg hover:bg-cyan-400 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+            >
+              {downloadStatus === "generating" ? "Generando PDF..." : "Descargar reporte (PDF)"}
+            </button>
+            {downloadStatus === "error" && (
+              <p className="mt-2 text-sm text-red-400">
+                No se pudo generar el PDF. Intentá de nuevo.
+              </p>
+            )}
+          </div>
           {findings.map((cat) => (
             <div key={cat.category}>
               <h3 className="text-lg font-bold text-white mb-3">{cat.category}</h3>

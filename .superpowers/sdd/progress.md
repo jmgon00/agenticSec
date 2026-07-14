@@ -4,7 +4,7 @@
 **Base Commit:** 54c8084 (docs: add implementation plan for Personal Security Assessment agent)
 **Plan:** docs/superpowers/plans/2026-07-14-personal-security-assessment.md
 
-## Status: IN PROGRESS
+## Status: ALL TASKS COMPLETE — final whole-branch review pending
 
 ## Tasks Status
 
@@ -17,7 +17,7 @@
 - [x] Task 7: Extract ScanResultsView + refactor AgentScanRunner — implemented (5f8bc77), review clean (production component, verified byte-for-byte extraction)
 - [x] Task 8: AgentAssessmentRunner component — implemented (ae17eb0), review clean
 - [x] Task 9: Wire AgentDetail.tsx + AgentCard.tsx — implemented (c519a0a), review clean (purely additive, confirmed)
-- [ ] Task 10: Register agent + dedupe seed
+- [x] Task 10: Register agent + dedupe seed — implemented (e08a2b2), review clean (all 6 agents verified, type match confirmed)
 
 ## Fix applied outside task scope
 

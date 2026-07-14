@@ -16,6 +16,8 @@ export const AgentCard = ({ agent }: AgentCardProps) => {
       ? "📋 Form"
       : agent.type === "scan"
       ? "🛡️ Scan"
+      : agent.type === "assessment"
+      ? "🕵️ Assessment"
       : "🔗 Link"
 
   return (

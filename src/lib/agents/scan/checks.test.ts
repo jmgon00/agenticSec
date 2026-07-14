@@ -5,7 +5,7 @@ vi.mock("./ssrf-guard", () => ({
 }));
 
 import { safeFetch } from "./ssrf-guard";
-import { checkHeaders, checkCookies, checkVersionLeak } from "./checks";
+import { checkHeaders, checkCookies, checkVersionLeak, checkExposedFiles } from "./checks";
 
 function mockResponse(
   headers: Record<string, string>,
@@ -113,5 +113,49 @@ describe("checkVersionLeak", () => {
     const result = await checkVersionLeak("https://example.com");
     expect(result.category).toBe("Versiones/CVEs");
     expect(result.points).toHaveLength(4);
+  });
+});
+
+describe("checkExposedFiles", () => {
+  beforeEach(() => vi.mocked(safeFetch).mockReset());
+
+  it("approves .env, .git and backups when everything 404s", async () => {
+    vi.mocked(safeFetch).mockImplementation(async () => mockResponse({}, 404));
+    const result = await checkExposedFiles("https://example.com");
+    const env = result.points.find((p) => p.point.startsWith(".env"));
+    const git = result.points.find((p) => p.point.startsWith(".git"));
+    expect(env?.estado).toBe("Aprobado");
+    expect(git?.estado).toBe("Aprobado");
+  });
+
+  it("flags .env when it returns 200", async () => {
+    vi.mocked(safeFetch).mockImplementation(async (url: string) => {
+      if (url.endsWith("/.env")) return mockResponse({}, 200);
+      return mockResponse({}, 404);
+    });
+    const result = await checkExposedFiles("https://example.com");
+    const env = result.points.find((p) => p.point.startsWith(".env"));
+    expect(env?.estado).toBe("Fallido");
+  });
+
+  it("flags directory listing when an autoindex page is found", async () => {
+    vi.mocked(safeFetch).mockImplementation(async (url: string) => {
+      if (url.includes("/uploads/")) {
+        return mockResponse({}, 200, "<html><body>Index of /uploads</body></html>");
+      }
+      return mockResponse({}, 404);
+    });
+    const result = await checkExposedFiles("https://example.com");
+    const listing = result.points.find((p) =>
+      p.point.includes("Listado de directorios")
+    );
+    expect(listing?.estado).toBe("Fallido");
+  });
+
+  it("returns all 5 exposed-files points", async () => {
+    vi.mocked(safeFetch).mockImplementation(async () => mockResponse({}, 404));
+    const result = await checkExposedFiles("https://example.com");
+    expect(result.category).toBe("Archivos Expuestos");
+    expect(result.points).toHaveLength(5);
   });
 });

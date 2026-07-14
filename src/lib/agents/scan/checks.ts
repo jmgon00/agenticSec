@@ -219,3 +219,52 @@ export async function checkVersionLeak(url: string): Promise<CategoryCheckResult
     ],
   }
 }
+
+const LISTING_CANDIDATES = ["/uploads/", "/assets/", "/images/", "/files/"]
+
+export async function checkExposedFiles(url: string): Promise<CategoryCheckResult> {
+  const base = new URL(url)
+  const probeStatus = async (path: string) => {
+    const target = new URL(path, base).toString()
+    const res = await safeFetch(target, { method: "GET" })
+    return res.status
+  }
+
+  const [envStatus, gitStatus, backupStatus, adminStatus] = await Promise.all([
+    probeStatus("/.env"),
+    probeStatus("/.git/HEAD"),
+    probeStatus("/backup.zip"),
+    probeStatus("/admin"),
+  ])
+
+  const listingHits = await Promise.all(
+    LISTING_CANDIDATES.map(async (path) => {
+      const target = new URL(path, base).toString()
+      const res = await safeFetch(target, { method: "GET" })
+      if (res.status !== 200) return null
+      const body = await res.text()
+      return body.includes("Index of") ? path : null
+    })
+  )
+  const openListingPath = listingHits.find((p) => p !== null) ?? null
+
+  const points: ScanPoint[] = [
+    envStatus === 404
+      ? point(".env accesible públicamente", "404", "OK", `GET /.env -> ${envStatus}`, "Sin acción requerida", "Aprobado")
+      : point(".env accesible públicamente", `HTTP ${envStatus}`, "Alto", `GET /.env -> ${envStatus}`, "Bloquear acceso a /.env vía servidor web", "Fallido"),
+    gitStatus === 404
+      ? point(".git/ accesible públicamente", "404", "OK", `GET /.git/HEAD -> ${gitStatus}`, "Sin acción requerida", "Aprobado")
+      : point(".git/ accesible públicamente", `HTTP ${gitStatus}`, "Alto", `GET /.git/HEAD -> ${gitStatus}`, "Bloquear acceso a /.git en la configuración del servidor", "Fallido"),
+    backupStatus === 404
+      ? point("Backups expuestos (.zip, .sql, .bak)", "404", "OK", `GET /backup.zip -> ${backupStatus}`, "Sin acción requerida", "Aprobado")
+      : point("Backups expuestos (.zip, .sql, .bak)", `HTTP ${backupStatus}`, "Medio", `GET /backup.zip -> ${backupStatus}`, "Eliminar o mover backups fuera del directorio público", "Pendiente"),
+    openListingPath === null
+      ? point("Listado de directorios abierto", "No detectado", "OK", `Rutas probadas: ${LISTING_CANDIDATES.join(", ")}`, "Sin acción requerida", "Aprobado")
+      : point("Listado de directorios abierto", `Detectado en ${openListingPath}`, "Medio", `GET ${openListingPath} devuelve un listado de tipo autoindex`, "Deshabilitar autoindex en el servidor web", "Fallido"),
+    adminStatus === 404
+      ? point("Paneles de administración expuestos sin protección", "404", "OK", `GET /admin -> ${adminStatus}`, "Sin acción requerida", "Aprobado")
+      : point("Paneles de administración expuestos sin protección", `HTTP ${adminStatus}`, "Medio", `GET /admin -> ${adminStatus}`, "Restringir por IP o agregar autenticación adicional", "Pendiente"),
+  ]
+
+  return { category: "Archivos Expuestos", points }
+}

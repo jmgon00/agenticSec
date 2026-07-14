@@ -4,7 +4,15 @@
 **Base Commit:** 54c8084 (docs: add implementation plan for Personal Security Assessment agent)
 **Plan:** docs/superpowers/plans/2026-07-14-personal-security-assessment.md
 
-## Status: ALL TASKS COMPLETE — final whole-branch review pending
+## Status: COMPLETE ✅ (final whole-branch review passed, ready to merge)
+
+## Final whole-branch review
+
+Reviewed range 54c8084..02bcfba (all 10 tasks). Verdict: Ready to merge. No Critical or Important code defects — end-to-end contract (form → zod schema → scoring rules → orchestrator → results UI → PDF) verified consistent across all layers; pre-existing production code (`AgentScanRunner.tsx`, `AgentDetail.tsx`, `AgentCard.tsx`, `prisma/seed.ts`) confirmed unmodified except intentional additive changes; the `Buffer`/`Uint8Array` fix confirmed present and correct.
+
+One Important item raised as a **product decision, not a code defect**: `userEmail` has no real authentication anywhere in this app (localStorage-based, same pattern as the existing scan agent) — for this feature the stored data is self-reported personal-security-weakness answers, materially more sensitive than a domain name, and is spoofable/attributable to someone else's email, with the 10/24h rate limit trivially bypassable by changing email. **Decision (user, 2026-07-14): ship as-is** — same trust model as the rest of the site today (no real auth anywhere), documented here as a known limitation to revisit if/when real authentication is added to the site.
+
+Minor findings (not fixed, informational, carried from per-task reviews — re-assessed in final review, none need escalating): orchestrator has no truncation/empty-summary guard on the Claude call (low risk, free-text not parsed JSON); rate-limit count includes failed runs and isn't atomic (matches existing scan-agent pattern, pre-existing debt); rate-limit check runs before agent-type validation (cosmetic — invalid agent-id could 429 before 404).
 
 ## Tasks Status
 

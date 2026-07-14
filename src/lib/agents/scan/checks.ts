@@ -1,4 +1,5 @@
 import { safeFetch } from "./ssrf-guard"
+import { resolveTxt } from "node:dns/promises"
 import type { CategoryCheckResult, ScanPoint } from "@/lib/agents/types"
 
 function point(
@@ -267,4 +268,79 @@ export async function checkExposedFiles(url: string): Promise<CategoryCheckResul
   ]
 
   return { category: "Archivos Expuestos", points }
+}
+
+async function resolveTxtSafe(name: string): Promise<string[]> {
+  try {
+    const records = await resolveTxt(name)
+    return records.map((r) => r.join(""))
+  } catch {
+    return []
+  }
+}
+
+export async function checkDNSEmail(hostname: string): Promise<CategoryCheckResult> {
+  const rootRecords = await resolveTxtSafe(hostname)
+  const spf = rootRecords.find((r) => r.startsWith("v=spf1"))
+
+  const dkimRecords = await resolveTxtSafe(`default._domainkey.${hostname}`)
+
+  const dmarcRecords = await resolveTxtSafe(`_dmarc.${hostname}`)
+  const dmarc = dmarcRecords.find((r) => r.startsWith("v=DMARC1"))
+
+  const points: ScanPoint[] = [
+    spf
+      ? point(
+          "Registro SPF presente y estricto (-all)",
+          spf.includes("-all") ? "Presente, estricto" : "Presente, no estricto",
+          spf.includes("-all") ? "OK" : "Medio",
+          spf,
+          "Configurar SPF terminando en -all",
+          spf.includes("-all") ? "Aprobado" : "Fallido"
+        )
+      : point(
+          "Registro SPF presente y estricto (-all)",
+          "Ausente",
+          "N/A",
+          "Sin dominio propio con email configurado o sin registro SPF",
+          "Configurar SPF cuando se agregue envío de email propio",
+          "No aplica"
+        ),
+    dkimRecords.length > 0
+      ? point(
+          "Registro DKIM configurado",
+          "Presente",
+          "OK",
+          dkimRecords.join(" "),
+          "Sin acción requerida",
+          "Aprobado"
+        )
+      : point(
+          "Registro DKIM configurado",
+          "No detectado en selector 'default'",
+          "N/A",
+          "Sin registro en default._domainkey — el selector real puede ser otro",
+          "Verificar el selector DKIM real si se envía email desde este dominio",
+          "No aplica"
+        ),
+    dmarc
+      ? point(
+          "Registro DMARC con policy quarantine/reject",
+          dmarc,
+          dmarc.includes("p=reject") || dmarc.includes("p=quarantine") ? "OK" : "Medio",
+          dmarc,
+          "Configurar DMARC con policy quarantine o reject",
+          dmarc.includes("p=reject") || dmarc.includes("p=quarantine") ? "Aprobado" : "Fallido"
+        )
+      : point(
+          "Registro DMARC con policy quarantine/reject",
+          "Ausente",
+          "N/A",
+          "Sin registro en _dmarc",
+          "Configurar DMARC cuando se agregue envío de email propio",
+          "No aplica"
+        ),
+  ]
+
+  return { category: "DNS/Email", points }
 }

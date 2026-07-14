@@ -131,10 +131,11 @@ export const AgentScanRunner = ({ agent, userEmail }: AgentScanRunnerProps) => {
       {!findings && (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-300 text-sm font-semibold mb-2">
+            <label htmlFor="scan-target" className="block text-gray-300 text-sm font-semibold mb-2">
               Dominio o URL a auditar
             </label>
             <input
+              id="scan-target"
               type="text"
               value={target}
               onChange={(e) => setTarget(e.target.value)}

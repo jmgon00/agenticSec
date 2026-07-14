@@ -1,87 +1,94 @@
-# Task 3 Report: Download button in AgentScanRunner.tsx
+# Task 3 Implementation Report: Question Metadata for Personal Security Assessment
 
-## What I implemented
+## Summary
+Successfully created `src/lib/agents/assessment/questions.ts` with complete question metadata for the Personal Security Assessment agent feature.
 
-Applied the four edits from `.superpowers\sdd\task-3-brief.md` exactly, against
-`src/components/sections/AgentScanRunner.tsx`:
+## Implementation Details
 
-1. **Type unification**: removed the local `ScanPoint`/`CategoryCheckResult` interface
-   declarations and imported `CategoryCheckResult` alongside `Agent` from
-   `@/lib/agents/types` (confirmed both `ScanPoint` and `CategoryCheckResult` are
-   already exported there, unchanged, from Task 1).
-2. **Download state**: added `downloadStatus` state (`"idle" | "generating" | "error"`)
-   next to the existing `summary` state.
-3. **Handler + reset**: added `handleDownloadReport`, which POSTs
-   `{ target, summary, findings }` to `POST /api/agents/${agent.id}/scan/report`
-   (Task 2's endpoint), and on success turns the response into a blob, creates an
-   object URL, and triggers a download via a synthetic `<a download>` click, naming
-   the file `reporte-seguridad-<cleanTarget>.pdf`. On a non-ok response or thrown
-   error it sets `downloadStatus` to `"error"`. Also added `setDownloadStatus("idle")`
-   to `handleReset`.
-4. **Button JSX**: added a "Descargar reporte (PDF)" button (with a "Generando PDF..."
-   disabled state and an inline error message) inside the existing
-   `{findings && (...)}` results block, right after the summary paragraph and before
-   the per-category findings list.
+### File Created
+- **Path:** `src/lib/agents/assessment/questions.ts`
+- **Status:** ✅ Created successfully
 
-The file diff matches the brief's proposed code verbatim — no deviations.
+### Content Verification
+- **Interfaces exported:**
+  - `AssessmentQuestion` - represents a single question with id, label, and options
+  - `AssessmentCategory` - represents a category with key, label, and array of questions
+  - `ASSESSMENT_CATEGORIES` - constant array of 7 categories with 28 total questions
 
-## What I tested and results
+- **Categories (7):**
+  1. identidad - 4 questions
+  2. cuentas - 4 questions
+  3. passwords - 4 questions
+  4. redes - 4 questions
+  5. dispositivos - 4 questions
+  6. red_domestica - 4 questions
+  7. ingenieria_social - 4 questions
 
-- **`npx tsc --noEmit -p tsconfig.json`**: fails, but with a pre-existing error in
-  `src/app/api/agents/[agent-id]/scan/report/route.ts:47` (`Buffer` not assignable to
-  `BodyInit`) that is unrelated to this task. I confirmed via `git stash` that this
-  same error exists on `main` *before* my change — it's a leftover issue in Task 2's
-  route file, out of scope for Task 3 (which only touches `AgentScanRunner.tsx`).
-  No new tsc errors were introduced by my edit; the only tsc error reported after my
-  change is that one pre-existing line, nothing pointing at `AgentScanRunner.tsx`.
-- **`npm test`**: PASS — 6 test files, 37 tests, all green. No regressions.
-- **Dev server smoke check**: started `npm run dev` (port 3000 was occupied by a
-  pre-existing process, so it ran on 3001). The agent detail route is actually
-  `/agents/[agent-id]` (not `/agentes/...` as the brief's Step 7 guessed) — confirmed
-  via `src/app/agents/[agent-id]/page.tsx` and the agent's slug `auditor-seguridad-ia`
-  in `src/content/agents.ts`. `GET /agents/auditor-seguridad-ia` returned `200` with
-  no server errors in the dev log. Stopped only the dev server process I started
-  (port 3001 listener and its children), left the pre-existing process on port 3000
-  untouched.
+- **Total Questions:** 28 ✅
 
-## Files changed
+### Question ID Validation
+All 28 question `id` values verified against `AssessmentAnswers` type in `src/lib/agents/types.ts`:
+- identidadBuscasteNombre, identidadDatosIndexados, identidadPerfilesViejos, identidadUsuarioRepetido
+- cuentasMfaEmail, cuentasMfaRedes, cuentasCantidad, cuentasRevisoTerceros
+- passwordsGestor, passwordsReutiliza, passwordsLargas, passwordsCambioEmail
+- redesPerfilPublico, redesFotosSensibles, redesMuestraTrabajo, redesGeolocalizacion
+- dispositivosBloqueo, dispositivosCifrado, dispositivosActualizados, dispositivosAntivirus
+- redRouterProtocolo, redPasswordDefault, redWpsDesactivado, redIotSeparada
+- ingSocialFechaNacimiento, ingSocialPreguntasSeguridad, ingSocialDatosFamiliares, ingSocialContactosDesconocidos
 
-- `E:\Cloude projects\interactiv3Web\src\components\sections\AgentScanRunner.tsx`
+All field names match exactly ✅
 
-## Self-review findings
+### Code Style
+- No semicolons ✅
+- Double quotes used ✅
+- Matches project conventions ✅
 
-- All 4 edit locations from the brief applied, verified against a full `git diff` —
-  matches the brief's proposed code exactly, character for character.
-- `findings` stays typed as `CategoryCheckResult[] | null`; the `if (!findings) return`
-  guard in `handleDownloadReport` runs synchronously before the `fetch` call, so
-  `findings` is correctly narrowed to `CategoryCheckResult[]` in the request body —
-  no `| null` leaks into the JSON payload, and tsc raises no complaint about this file.
-- `handleReset` now resets `downloadStatus` to `"idle"`.
-- The download button and its error message are rendered only inside the existing
-  `{findings && (...)}` block, not conditionally duplicated elsewhere.
-- Tailwind classes on the new button are syntactically valid (checked by eye against
-  existing buttons in the same file — same idiom of `px-N py-N bg-... border ...
-  disabled:opacity-50 disabled:cursor-not-allowed transition-colors`).
-- Code style matches the rest of the file: no semicolons, double quotes, same
-  indentation.
-- Nothing beyond the brief was touched; no other files were modified.
+## Verification Commands
 
-## Issues or concerns
+### TypeScript Compilation
+```bash
+npx tsc --noEmit -p tsconfig.json
+```
+**Result:** ✅ No errors
 
-- **Expected local-DB verification gap**: per the task's known limitation, the local
-  `DATABASE_URL` is SQLite while the Prisma schema targets PostgreSQL, so
-  `prisma.securityScanRun.create()` in the scan-stream endpoint cannot succeed
-  locally. This means I could not drive a live scan to reach the "findings" state and
-  click the new button in a real browser. I did a careful line-by-line diff review
-  against the brief instead (see self-review above) to catch integration bugs that a
-  runtime click-through would otherwise catch. Full manual end-to-end verification
-  (Step 7 in the brief: click button, download PDF, open it, check size/branding,
-  simulate a network error) needs to happen after deployment to Vercel, as noted in
-  the task instructions.
-- **Pre-existing tsc error in Task 2's route.ts** (Buffer vs BodyInit mismatch) is
-  unrelated to this task's scope but still present on `main`. Flagging it here in case
-  it needs a follow-up fix — not something I touched since Task 3 is scoped to
-  `AgentScanRunner.tsx` only.
-- **Stale report file found**: `task-3-report.md` already existed with unrelated
-  content from a different task ("ChatInbox mock chat component") before I wrote this
-  report — overwritten with the correct Task 3 content above.
+### Test Suite
+```bash
+npm test
+```
+**Result:** ✅ All tests passing
+```
+Test Files  7 passed (7)
+     Tests  49 passed (49)
+```
+
+## Git Commit
+```
+Commit: 77bfe53
+Message: feat: add question metadata for personal security assessment form
+Files changed: 1
+Insertions: 171
+```
+
+## Self-Review Findings
+
+✅ **Completeness:**
+- All 7 categories present
+- All 28 questions with correct IDs
+- ID values match AssessmentAnswers type exactly
+- All questions have labels and options defined
+
+✅ **Code Quality:**
+- TypeScript types correctly defined
+- Proper use of `keyof AssessmentAnswers` for type safety
+- Consistent structure across all categories
+- Reusable constants (SI_NO, SI_NO_NO_SE) for common option patterns
+- Spanish labels and options properly localized
+
+✅ **No Issues or Concerns**
+- File follows project conventions
+- No TypeScript errors or warnings
+- All tests still passing
+- Static data-only file (no runtime logic)
+
+## Files Changed
+- Created: `src/lib/agents/assessment/questions.ts` (171 lines)

@@ -5,7 +5,7 @@ export interface Agent {
   description: string
   fullDescription: string
   category: "educativo" | "productivo"
-  type: "chat" | "form" | "link"
+  type: "chat" | "form" | "link" | "scan"
   icon: string
   instructions?: string
   inputFormat?: Record<string, unknown>
@@ -50,4 +50,20 @@ export interface AgentExecutionResponse {
   tokens: number
   timestamp: string
   error?: string
+}
+
+export type ScanEstado = "Aprobado" | "Fallido" | "Pendiente" | "No aplica"
+
+export interface ScanPoint {
+  point: string
+  result: string
+  severity: string
+  evidence: string
+  recommendation: string
+  estado: ScanEstado
+}
+
+export interface CategoryCheckResult {
+  category: string
+  points: ScanPoint[]
 }

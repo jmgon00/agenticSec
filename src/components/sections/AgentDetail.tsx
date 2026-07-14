@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Agent, AgentSession } from "@/lib/agents/types"
 import { AgentChat } from "./AgentChat"
+import { AgentScanRunner } from "./AgentScanRunner"
 
 interface AgentDetailProps {
   agentSlug: string
@@ -97,6 +98,38 @@ export const AgentDetail = ({ agentSlug }: AgentDetailProps) => {
               <span>↗</span>
             </a>
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Para agentes tipo "scan", renderizar el runner de auditoría en vivo
+  if (agent.type === "scan") {
+    return (
+      <div className="py-20 px-4 bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen">
+        <div className="max-w-2xl mx-auto">
+          <a href="/agents" className="text-cyan-400 hover:text-cyan-300 mb-4 inline-block">
+            ← Volver a Agentes
+          </a>
+
+          <div className="flex items-start gap-4 mb-8">
+            <div className="text-6xl">{agent.icon}</div>
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">{agent.name}</h1>
+              <p className="text-gray-400 mb-4">{agent.fullDescription}</p>
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-400">
+                🛡️ Auditoría en vivo
+              </span>
+            </div>
+          </div>
+
+          {userEmail ? (
+            <AgentScanRunner agent={agent} userEmail={userEmail} />
+          ) : (
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 text-yellow-100">
+              Ingresa tu email para iniciar la auditoría
+            </div>
+          )}
         </div>
       </div>
     )

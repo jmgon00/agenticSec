@@ -85,6 +85,16 @@ Sé Socrático - haz preguntas guía.`,
       "Dashboard en tiempo real",
     ],
   },
+  {
+    name: "Auditor de Seguridad con IA",
+    slug: "auditor-seguridad-ia",
+    description: "Un agente de IA audita tu sitio en vivo: headers, TLS, archivos expuestos, DNS y más",
+    fullDescription:
+      "Agente productivo que ejecuta una auditoría básica de seguridad real contra tu dominio: 28 puntos de control en 6 categorías, corridos en vivo por un agente de IA que interpreta los resultados y te explica qué corregir primero. No es un ejemplo — corre contra tu sitio de verdad, con tu autorización.",
+    category: "productivo",
+    type: "scan",
+    icon: "🛡️",
+  },
 ]
 
 export const getAgentBySlug = (slug: string): (typeof SEED_AGENTS)[0] | undefined => {

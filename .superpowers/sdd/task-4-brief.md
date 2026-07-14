@@ -1,43 +1,65 @@
-## Task 4: Simplify `Hero` to a compact title/subtitle block
+### Task 4: Orquestador (resumen ejecutivo vía Claude)
 
 **Files:**
-- Modify: `src/components/sections/Hero.tsx` (full rewrite)
+- Create: `src/lib/agents/assessment/orchestrator.ts`
 
 **Interfaces:**
-- Consumes: `HERO` from `@/content/config` (existing, has `.title` and `.subtitle` string fields — unchanged).
-- Produces: `Hero` component, named export, no props. Task 5 renders it above `ChatInbox` with no props.
+- Consumes: `scoreAssessment`, `computeRiskScore` de `./scoring` (Task 2).
+- Produces: `export interface AssessmentOutcome { findings: CategoryCheckResult[]; summary: string; riskScore: number }` y `export async function runPersonalAssessment(answers: AssessmentAnswers): Promise<AssessmentOutcome>` — usado por Task 5.
 
-- [ ] **Step 1: Replace `Hero.tsx` content**
+- [ ] **Step 1: Crear `orchestrator.ts`**
 
-```tsx
-"use client";
+Crear `src/lib/agents/assessment/orchestrator.ts`:
 
-import { HERO } from "@/content/config";
+```ts
+import Anthropic from "@anthropic-ai/sdk"
+import { scoreAssessment, computeRiskScore } from "./scoring"
+import type { AssessmentAnswers, CategoryCheckResult } from "@/lib/agents/types"
 
-export const Hero = () => {
-  return (
-    <section className="text-center px-4 py-6 shrink-0">
-      <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-magenta-400 to-cyan-400 bg-clip-text text-transparent animate-textGradient bg-[length:200%_auto]">
-        {HERO.title}
-      </h1>
-      <p className="text-base md:text-lg text-gray-300 font-light">
-        {HERO.subtitle}
-      </p>
-    </section>
-  );
-};
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+export interface AssessmentOutcome {
+  findings: CategoryCheckResult[]
+  summary: string
+  riskScore: number
+}
+
+export async function runPersonalAssessment(answers: AssessmentAnswers): Promise<AssessmentOutcome> {
+  const findings = scoreAssessment(answers)
+  const riskScore = computeRiskScore(findings)
+
+  const model = process.env.SCAN_AGENT_MODEL || "claude-sonnet-5"
+  const systemPrompt = `Sos un agente de evaluación de seguridad personal (Personal Security Assessment). Ya se calculó el resultado de las 7 categorías y un puntaje de riesgo global de 0 a 100 (más alto = mejor postura de seguridad). Tu única tarea es escribir un resumen ejecutivo de 2-3 párrafos en español claro, sin jerga técnica, para una persona sin conocimientos de seguridad: interpretá el puntaje global, mencioná primero las categorías con mayor riesgo, y priorizá qué corregir antes. No repitas la lista completa de puntos — eso ya se muestra aparte. No inventes datos que no estén en el resultado que te paso.`
+
+  const userMessage = `Puntaje de riesgo global: ${riskScore}/100\n\nResultado por categoría:\n${JSON.stringify(findings, null, 2)}`
+
+  const response = await client.messages.create({
+    model,
+    max_tokens: 2048,
+    system: systemPrompt,
+    thinking: { type: "adaptive" },
+    messages: [{ role: "user", content: userMessage }],
+  })
+
+  const textBlock = response.content.find((b): b is Anthropic.TextBlock => b.type === "text")
+  if (!textBlock) {
+    throw new Error("El agente no devolvió un resumen")
+  }
+
+  return { findings, summary: textBlock.text, riskScore }
+}
 ```
 
-- [ ] **Step 2: Verify with TypeScript**
+- [ ] **Step 2: Verificar tipos**
 
-Run: `npx tsc --noEmit`
-Expected: no output.
+Run: `npx tsc --noEmit -p tsconfig.json`
+Expected: sin errores. (Sin test unitario para este archivo — mismo criterio que `src/lib/agents/scan/orchestrator.ts`, que tampoco tiene test propio porque llama a la API real de Claude; se verifica manualmente end-to-end en Task 8.)
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 3: Commit**
 
 ```bash
-git add src/components/sections/Hero.tsx
-git commit -m "feat: simplify Hero to a compact title/subtitle block"
+git add src/lib/agents/assessment/orchestrator.ts
+git commit -m "feat: add orchestrator to generate the assessment executive summary"
 ```
 
 ---

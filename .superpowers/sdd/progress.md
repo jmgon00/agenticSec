@@ -10,7 +10,7 @@
 
 - [x] Task 1: Types + Prisma schema — implemented (8110f6f), review clean
 - [x] Task 2: Scoring engine — implemented (2b3e1d4), review clean (28/28 rules verified rule-by-rule)
-- [ ] Task 3: Questions metadata
+- [x] Task 3: Questions metadata — implemented (77bfe53), review clean (28/28 ids + option sets verified)
 - [ ] Task 4: Orchestrator
 - [ ] Task 5: Assessment run endpoint
 - [ ] Task 6: Assessment report endpoint

@@ -9,7 +9,7 @@
 ## Tasks Status
 
 - [x] Task 1: Types + Prisma schema — implemented (8110f6f), review clean
-- [ ] Task 2: Scoring engine
+- [x] Task 2: Scoring engine — implemented (2b3e1d4), review clean (28/28 rules verified rule-by-rule)
 - [ ] Task 3: Questions metadata
 - [ ] Task 4: Orchestrator
 - [ ] Task 5: Assessment run endpoint

@@ -16,7 +16,7 @@
 - [x] Task 6: Assessment report endpoint — implemented (d43ddff), review clean (confirmed scan/report untouched)
 - [x] Task 7: Extract ScanResultsView + refactor AgentScanRunner — implemented (5f8bc77), review clean (production component, verified byte-for-byte extraction)
 - [x] Task 8: AgentAssessmentRunner component — implemented (ae17eb0), review clean
-- [ ] Task 9: Wire AgentDetail.tsx + AgentCard.tsx
+- [x] Task 9: Wire AgentDetail.tsx + AgentCard.tsx — implemented (c519a0a), review clean (purely additive, confirmed)
 - [ ] Task 10: Register agent + dedupe seed
 
 ## Fix applied outside task scope

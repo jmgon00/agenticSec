@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const dateStr = generatedAt.toISOString().slice(0, 10)
     const filename = `reporte-evaluacion-personal-${sanitizeFilenamePart(target)}-${dateStr}.pdf`
 
-    return new Response(pdfBuffer, {
+    return new Response(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",

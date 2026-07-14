@@ -133,9 +133,10 @@ export const AgentScanRunner = ({ agent, userEmail }: AgentScanRunnerProps) => {
       const blob = await response.blob()
       const url = URL.createObjectURL(blob)
       const cleanTarget = target.replace(/^https?:\/\//, "").replace(/[^a-zA-Z0-9.-]/g, "-")
+      const dateStr = new Date().toISOString().slice(0, 10)
       const link = document.createElement("a")
       link.href = url
-      link.download = `reporte-seguridad-${cleanTarget}.pdf`
+      link.download = `reporte-seguridad-${cleanTarget}-${dateStr}.pdf`
       document.body.appendChild(link)
       link.click()
       link.remove()

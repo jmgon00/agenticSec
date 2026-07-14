@@ -3,23 +3,23 @@ import { z } from "zod"
 import { renderScanReportPdf } from "@/lib/agents/scan/report-pdf"
 
 const scanPointSchema = z.object({
-  point: z.string(),
-  result: z.string(),
-  severity: z.string(),
-  evidence: z.string(),
-  recommendation: z.string(),
+  point: z.string().max(300),
+  result: z.string().max(500),
+  severity: z.string().max(50),
+  evidence: z.string().max(2000),
+  recommendation: z.string().max(1000),
   estado: z.enum(["Aprobado", "Fallido", "Pendiente", "No aplica"]),
 })
 
 const categoryCheckResultSchema = z.object({
-  category: z.string(),
-  points: z.array(scanPointSchema),
+  category: z.string().max(200),
+  points: z.array(scanPointSchema).max(200),
 })
 
 const reportRequestSchema = z.object({
-  target: z.string().min(1),
-  summary: z.string(),
-  findings: z.array(categoryCheckResultSchema).min(1),
+  target: z.string().min(1).max(500),
+  summary: z.string().max(10000),
+  findings: z.array(categoryCheckResultSchema).min(1).max(50),
 })
 
 function sanitizeFilenamePart(value: string): string {

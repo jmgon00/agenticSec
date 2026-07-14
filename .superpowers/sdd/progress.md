@@ -9,7 +9,7 @@
 ## Tasks Status
 
 - [x] Task 1: PDF generator (report-pdf.tsx) — implemented (4b46dee), review clean
-- [ ] Task 2: POST /api/agents/[agent-id]/scan/report endpoint
+- [x] Task 2: POST /api/agents/[agent-id]/scan/report endpoint — implemented (1bf77f3), review clean
 - [ ] Task 3: Download button in AgentScanRunner.tsx
 
 ## Minor findings log (not fixed, informational)

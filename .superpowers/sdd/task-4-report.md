@@ -1,59 +1,76 @@
-# Task 4 Report: Simplify Hero to a compact title/subtitle block
+# Task 4: Orchestrator (Assessment Executive Summary) — Completion Report
 
-## Implementation Summary
+## Summary
 
-Replaced the full viewport Hero component with a compact title/subtitle block as specified in the task brief.
+Successfully implemented `src/lib/agents/assessment/orchestrator.ts`, a thin wrapper that:
+1. Calls `scoreAssessment()` from Task 2 to compute category-level findings
+2. Calls `computeRiskScore()` to compute the global 0-100 risk score
+3. Makes a single call to the Anthropic API (Claude Sonnet 5) to generate a 2-3 paragraph executive summary in Spanish
 
-### What Was Changed
+The implementation follows the exact specification in the task brief, mirrors the existing pattern in `src/lib/agents/scan/orchestrator.ts`, and exports the required interface (`AssessmentOutcome`) and function (`runPersonalAssessment`).
 
-**File:** `src/components/sections/Hero.tsx`
+## Implementation Details
 
-**Changes:**
-- Removed `min-h-screen flex items-center justify-center` container layout
-- Removed full gradient background (`bg-gradient-to-b from-dark-base via-gray-950 to-gray-900`)
-- Removed the entire floating particles section (10 lines of absolute-positioned divs)
-- Removed `relative overflow-hidden` positioning context
-- Reduced heading font size from `text-5xl md:text-6xl` to `text-3xl md:text-4xl`
-- Reduced heading margin from `mb-6` to `mb-2`
-- Reduced paragraph text size from `text-lg md:text-xl` to `text-base md:text-lg`
-- Added `shrink-0` to prevent flex-grow behavior
-- Simplified section to `text-center px-4 py-6 shrink-0`
+**File created:** `src/lib/agents/assessment/orchestrator.ts`
 
-**Lines changed:** 7 insertions, 17 deletions (net -10 lines)
+**Key features:**
+- Accepts `AssessmentAnswers` (union of 15 yes/no/multiselect questions from the form)
+- Returns `AssessmentOutcome` with `findings`, `summary`, and `riskScore`
+- Uses `SCAN_AGENT_MODEL` environment variable (defaults to `claude-sonnet-5`)
+- Enables adaptive extended thinking for the Claude call
+- Extracts summary from text block in response; throws if none found
+- No TypeScript errors; no test file required (same pattern as scan orchestrator — calls real API)
 
-### Verification Results
+## Verification Commands and Output
 
-**TypeScript Compilation:**
+### TypeScript Type-Check
 ```
-$ npx tsc --noEmit
+$ npx tsc --noEmit -p tsconfig.json
+(no output = success)
 ```
-**Output:** (no output — compilation successful)
+Result: ✅ No errors
 
-**Status:** ✓ Pass
+### Full Test Suite
+```
+$ npm test
+Test Files  7 passed (7)
+Tests  49 passed (49)
+Duration  877ms
+```
+Result: ✅ No regressions; all 49 tests pass
 
-### Self-Review Checklist
+### Git Commit
+```
+[main 3d577b3] feat: add orchestrator to generate the assessment executive summary
+ 1 file changed, 36 insertions(+)
+ create mode 100644 src/lib/agents/assessment/orchestrator.ts
+```
+Result: ✅ Committed with commit hash `3d577b3`
 
-- [x] Hero.tsx matches brief exactly (title/subtitle, no particles, compact layout)
-- [x] No min-h-screen full-viewport styling
-- [x] Floating particles section removed completely
-- [x] Gradient background removed
-- [x] Font sizes reduced per spec (5xl→3xl, 6xl→4xl, lg→base, xl→lg)
-- [x] Spacing reduced (mb-6→mb-2)
-- [x] shrink-0 applied to prevent flex growth
-- [x] Uses existing Tailwind color tokens (cyan-400, magenta-400, gray-300)
-- [x] Named export preserved (`export const Hero`)
-- [x] "use client" directive preserved
-- [x] Imports HERO from @/content/config as expected
-- [x] TypeScript compilation produces zero errors
+## Files Changed
 
-### Files Modified
+- **Created:** `src/lib/agents/assessment/orchestrator.ts` (36 lines)
+  - Exports: `AssessmentOutcome` interface, `runPersonalAssessment` async function
+  - Imports: `Anthropic` SDK, `scoreAssessment` & `computeRiskScore` from `./scoring`, types from `@/lib/agents/types`
 
-- `src/components/sections/Hero.tsx` (completely rewritten)
+## Self-Review Findings
 
-### No Concerns
+- ✅ Code matches brief exactly (line-for-line transcription)
+- ✅ Style consistent: no semicolons, double quotes, camelCase
+- ✅ Type safety: imports resolve to existing Task 2 exports and core types
+- ✅ API usage: correct Anthropic SDK pattern (messages.create, thinking adaptive, text block extraction)
+- ✅ Error handling: throws if no text block returned from API
+- ✅ Environment: uses `SCAN_AGENT_MODEL` env var with sensible default
+- ✅ No TypeScript errors after compilation
+- ✅ Test suite fully passes (regression check successful)
+- ✅ Ready for Task 5 (API route) and Task 8 (end-to-end UI verification)
 
-The implementation is a straightforward transcription of the brief code. TypeScript verification passed cleanly. The component now renders as a compact header block suitable for placement above the ChatInbox component in the home page redesign.
+## Notes
 
----
+- LF/CRLF line-ending warning from Git (Windows env): non-critical; Git will normalize on next touch
+- This file has no unit tests by design (same as `src/lib/agents/scan/orchestrator.ts`) — verification is via `tsc --noEmit` + regression test suite
+- Manual end-to-end testing will occur in Task 8 once the API route (Task 5) and UI (Tasks 6-7) are integrated
 
-**Commit:** c52d011 — "feat: simplify Hero to a compact title/subtitle block"
+## Status
+
+✅ **DONE** — All requirements met, all verifications passed, file committed.

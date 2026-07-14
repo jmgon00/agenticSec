@@ -26,7 +26,9 @@ function mockResponse(
 }
 
 describe("checkHeaders", () => {
-  beforeEach(() => vi.mocked(safeFetch).mockReset());
+  beforeEach(() => {
+    vi.mocked(safeFetch).mockReset();
+  });
 
   it("marks CSP as Fallido when the header is absent", async () => {
     vi.mocked(safeFetch).mockResolvedValue(mockResponse({}));
@@ -57,7 +59,9 @@ describe("checkHeaders", () => {
 });
 
 describe("checkCookies", () => {
-  beforeEach(() => vi.mocked(safeFetch).mockReset());
+  beforeEach(() => {
+    vi.mocked(safeFetch).mockReset();
+  });
 
   it("marks all cookie points as No aplica when no cookie is set", async () => {
     vi.mocked(safeFetch).mockResolvedValue(mockResponse({}));
@@ -86,7 +90,9 @@ describe("checkCookies", () => {
 });
 
 describe("checkVersionLeak", () => {
-  beforeEach(() => vi.mocked(safeFetch).mockReset());
+  beforeEach(() => {
+    vi.mocked(safeFetch).mockReset();
+  });
 
   it("flags a Server header containing a version number", async () => {
     vi.mocked(safeFetch).mockResolvedValue(
@@ -117,7 +123,9 @@ describe("checkVersionLeak", () => {
 });
 
 describe("checkExposedFiles", () => {
-  beforeEach(() => vi.mocked(safeFetch).mockReset());
+  beforeEach(() => {
+    vi.mocked(safeFetch).mockReset();
+  });
 
   it("approves .env, .git and backups when everything 404s", async () => {
     vi.mocked(safeFetch).mockImplementation(async () => mockResponse({}, 404));

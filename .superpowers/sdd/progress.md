@@ -14,12 +14,17 @@
 - [x] Task 4: Orchestrator — implemented (3d577b3), review clean (deterministic pass-through verified)
 - [x] Task 5: Assessment run endpoint — implemented (5619f2f), review clean (zod schema field-checked against Tasks 2/3)
 - [x] Task 6: Assessment report endpoint — implemented (d43ddff), review clean (confirmed scan/report untouched)
-- [ ] Task 7: Extract ScanResultsView + refactor AgentScanRunner
+- [x] Task 7: Extract ScanResultsView + refactor AgentScanRunner — implemented (5f8bc77), review clean (production component, verified byte-for-byte extraction)
 - [ ] Task 8: AgentAssessmentRunner component
 - [ ] Task 9: Wire AgentDetail.tsx + AgentCard.tsx
 - [ ] Task 10: Register agent + dedupe seed
+
+## Fix applied outside task scope
+
+- `4f38f46` — Task 7's `tsc --noEmit` run surfaced a real bug in Task 6's `assessment/report/route.ts:47`: same `Buffer<ArrayBufferLike>` vs `BodyInit` mismatch already fixed once before in the scan agent's report route (commit c20e04b, previous PDF-report feature). Root cause: this plan's Task 6 brief was authored from a stale pre-fix copy of that file, reintroducing the bug. Fixed the same way (`new Uint8Array(pdfBuffer)`). Verified: `tsc --noEmit` clean, 55/55 tests pass. Reviewed and confirmed correct as part of Task 7's review.
 
 ## Minor findings log (not fixed, informational)
 
 - Task 5's 400 test only covers a missing field, not an invalid enum value — low risk since the schema was verified field-by-field in review, but weaker regression coverage against future schema edits.
 - Task 5's test file has `as any` casts + one unused-var from destructure-to-omit, tripping `@typescript-eslint/no-explicit-any` — matches a pre-existing pattern in `ssrf-guard.test.ts`, not new debt.
+- Task 7's extracted `ScanResultsView.tsx` drops an unreachable `if (!findings) return` guard that existed in the original `handleDownloadReport` — traced to the plan's own brief text, not implementer error; provably dead code in both versions (button only renders when findings is non-null), zero behavior change.

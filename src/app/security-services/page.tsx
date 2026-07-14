@@ -179,7 +179,7 @@ export default function SecurityServicesPage() {
 
                 {/* Results if available */}
                 {caseItem.content?.results && (
-                  <div>
+                  <div className="mb-4">
                     <h4 className="text-sm font-bold text-cyan-400 mb-2">
                       Resultados:
                     </h4>
@@ -196,6 +196,47 @@ export default function SecurityServicesPage() {
                         </li>
                       ))}
                     </ul>
+                  </div>
+                )}
+
+                {/* Benchmarks if available */}
+                {caseItem.content?.benchmarks && (
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    {Object.entries(caseItem.content.benchmarks).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="rounded border border-gray-700 bg-gray-800/60 p-3"
+                      >
+                        <div className="text-xs text-gray-400 mb-1">{key}</div>
+                        <div className="text-lg font-bold text-cyan-400">{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Report links if available */}
+                {(caseItem.content?.clientReportUrl || caseItem.content?.technicalReportUrl) && (
+                  <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-700">
+                    {caseItem.content.clientReportUrl && (
+                      <a
+                        href={caseItem.content.clientReportUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-400 border border-cyan-500/60 rounded-full px-4 py-2 hover:bg-cyan-400 hover:text-dark-base transition-colors"
+                      >
+                        Ver presentación para cliente ↗
+                      </a>
+                    )}
+                    {caseItem.content.technicalReportUrl && (
+                      <a
+                        href={caseItem.content.technicalReportUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-magenta-400 border border-magenta-500/60 rounded-full px-4 py-2 hover:bg-magenta-400 hover:text-white transition-colors"
+                      >
+                        Ver reporte técnico ↗
+                      </a>
+                    )}
                   </div>
                 )}
               </div>

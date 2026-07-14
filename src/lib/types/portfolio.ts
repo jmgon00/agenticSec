@@ -9,6 +9,8 @@ export interface PortfolioItemContent {
   demoUrl?: string;
   videoUrl?: string;
   documentation?: string;
+  clientReportUrl?: string;
+  technicalReportUrl?: string;
 }
 
 export interface PortfolioItem {

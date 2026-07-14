@@ -98,6 +98,16 @@ Sé Socrático - haz preguntas guía.`,
     type: "scan",
     icon: "🛡️",
   },
+  {
+    name: "Evaluación de Seguridad Personal",
+    slug: "evaluacion-seguridad-personal",
+    description: "Un cuestionario guiado por IA evalúa tu exposición digital personal: identidad, cuentas, contraseñas, redes sociales y más",
+    fullDescription:
+      "Agente productivo que te guía por un cuestionario de 7 categorías (28 puntos de control) sobre tu seguridad personal: qué tan expuesta está tu identidad digital, tus hábitos de contraseñas y MFA, la privacidad de tus redes sociales, tus dispositivos y tu red doméstica. Al final, un agente de IA interpreta tus respuestas, te da un puntaje de riesgo de 0 a 100 y prioriza qué corregir primero.",
+    category: "productivo",
+    type: "assessment",
+    icon: "🕵️",
+  },
 ]
 
 export const getAgentBySlug = (slug: string): (typeof SEED_AGENTS)[0] | undefined => {

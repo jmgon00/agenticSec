@@ -15,7 +15,7 @@
 - [x] Task 5: Assessment run endpoint — implemented (5619f2f), review clean (zod schema field-checked against Tasks 2/3)
 - [x] Task 6: Assessment report endpoint — implemented (d43ddff), review clean (confirmed scan/report untouched)
 - [x] Task 7: Extract ScanResultsView + refactor AgentScanRunner — implemented (5f8bc77), review clean (production component, verified byte-for-byte extraction)
-- [ ] Task 8: AgentAssessmentRunner component
+- [x] Task 8: AgentAssessmentRunner component — implemented (ae17eb0), review clean
 - [ ] Task 9: Wire AgentDetail.tsx + AgentCard.tsx
 - [ ] Task 10: Register agent + dedupe seed
 

@@ -13,7 +13,7 @@
 - [x] Task 3: Questions metadata — implemented (77bfe53), review clean (28/28 ids + option sets verified)
 - [x] Task 4: Orchestrator — implemented (3d577b3), review clean (deterministic pass-through verified)
 - [x] Task 5: Assessment run endpoint — implemented (5619f2f), review clean (zod schema field-checked against Tasks 2/3)
-- [ ] Task 6: Assessment report endpoint
+- [x] Task 6: Assessment report endpoint — implemented (d43ddff), review clean (confirmed scan/report untouched)
 - [ ] Task 7: Extract ScanResultsView + refactor AgentScanRunner
 - [ ] Task 8: AgentAssessmentRunner component
 - [ ] Task 9: Wire AgentDetail.tsx + AgentCard.tsx

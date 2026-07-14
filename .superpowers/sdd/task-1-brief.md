@@ -1,269 +1,113 @@
-### Task 1: Generador de PDF (`report-pdf.tsx`)
+### Task 1: Tipos y schema de Prisma
 
 **Files:**
-- Create: `src/lib/agents/scan/report-pdf.tsx`
-- Test: `src/lib/agents/scan/report-pdf.test.ts`
+- Modify: `src/lib/agents/types.ts`
+- Modify: `prisma/schema.prisma`
 
 **Interfaces:**
-- Consumes: `CategoryCheckResult`, `ScanEstado` desde `@/lib/agents/types` (ya existen, sin cambios).
-- Produces: `export interface ScanReportInput { target: string; summary: string; findings: CategoryCheckResult[]; generatedAt: Date }` y `export async function renderScanReportPdf(input: ScanReportInput): Promise<Buffer>` — usado por Task 2.
+- Produces: `AssessmentAnswers` (28 campos, tipos unión literal) y `Agent.type` extendido con `"assessment"` — consumidos por todas las tasks siguientes. Modelo Prisma `PersonalAssessmentRun` — consumido por Task 5/6.
 
-- [ ] **Step 1: Instalar la dependencia**
+- [ ] **Step 1: Extender `Agent.type` y agregar `AssessmentAnswers`**
 
-Run: `npm install @react-pdf/renderer@^4.5.1`
-Expected: `package.json` y `package-lock.json` quedan modificados con la nueva dependencia.
-
-- [ ] **Step 2: Escribir el test (falla porque el archivo no existe todavía)**
-
-Crear `src/lib/agents/scan/report-pdf.test.ts`:
+En `src/lib/agents/types.ts`, reemplazar la línea:
 
 ```ts
-import { describe, it, expect } from "vitest"
-import { renderScanReportPdf } from "./report-pdf"
-import type { CategoryCheckResult } from "@/lib/agents/types"
-
-const sampleFindings: CategoryCheckResult[] = [
-  {
-    category: "Headers HTTP",
-    points: [
-      {
-        point: "Content-Security-Policy configurado",
-        result: "Presente",
-        severity: "OK",
-        evidence: "content-security-policy: default-src 'self'",
-        recommendation: "Ninguna acción requerida.",
-        estado: "Aprobado",
-      },
-      {
-        point: "Strict-Transport-Security configurado",
-        result: "Ausente",
-        severity: "Alto",
-        evidence: "Header no encontrado en la respuesta",
-        recommendation: "Agregar el header Strict-Transport-Security.",
-        estado: "Fallido",
-      },
-    ],
-  },
-]
-
-describe("renderScanReportPdf", () => {
-  it("generates a valid, lightweight PDF buffer", async () => {
-    const buffer = await renderScanReportPdf({
-      target: "https://ejemplo.com",
-      summary: "Resumen ejecutivo de prueba.",
-      findings: sampleFindings,
-      generatedAt: new Date("2026-07-14T12:00:00Z"),
-    })
-
-    expect(buffer.subarray(0, 4).toString("ascii")).toBe("%PDF")
-    expect(buffer.length).toBeGreaterThan(0)
-    expect(buffer.length).toBeLessThan(200_000)
-  })
-})
+  type: "chat" | "form" | "link" | "scan"
 ```
 
-- [ ] **Step 3: Correr el test para confirmar que falla**
+por:
 
-Run: `npx vitest run src/lib/agents/scan/report-pdf.test.ts`
-Expected: FAIL — `Cannot find module './report-pdf'` (el archivo todavía no existe).
+```ts
+  type: "chat" | "form" | "link" | "scan" | "assessment"
+```
 
-- [ ] **Step 4: Crear el generador de PDF**
+Y agregar al final del archivo:
 
-Crear `src/lib/agents/scan/report-pdf.tsx`:
+```ts
 
-```tsx
-import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer"
-import type { CategoryCheckResult, ScanEstado } from "@/lib/agents/types"
+export interface AssessmentAnswers {
+  identidadBuscasteNombre: "si" | "no"
+  identidadDatosIndexados: "si" | "no" | "no_se"
+  identidadPerfilesViejos: "si" | "no" | "no_se"
+  identidadUsuarioRepetido: "si" | "no"
 
-export interface ScanReportInput {
-  target: string
-  summary: string
-  findings: CategoryCheckResult[]
-  generatedAt: Date
-}
+  cuentasMfaEmail: "si" | "no"
+  cuentasMfaRedes: "si" | "no" | "parcial"
+  cuentasCantidad: "menos_20" | "20_80" | "mas_80" | "no_se"
+  cuentasRevisoTerceros: "si" | "no"
 
-const ESTADO_COLORS: Record<ScanEstado, { background: string; color: string }> = {
-  Aprobado: { background: "#22c55e", color: "#ffffff" },
-  Fallido: { background: "#ef4444", color: "#ffffff" },
-  Pendiente: { background: "#eab308", color: "#1f2937" },
-  "No aplica": { background: "#6b7280", color: "#ffffff" },
-}
+  passwordsGestor: "si" | "no"
+  passwordsReutiliza: "si" | "no" | "no_se"
+  passwordsLargas: "si" | "no" | "no_se"
+  passwordsCambioEmail: "si" | "no" | "no_se"
 
-const styles = StyleSheet.create({
-  page: {
-    paddingTop: 100,
-    paddingBottom: 60,
-    paddingHorizontal: 40,
-    fontSize: 10,
-    fontFamily: "Helvetica",
-    color: "#1f2937",
-  },
-  header: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#030712",
-    paddingHorizontal: 40,
-    paddingVertical: 20,
-  },
-  brand: {
-    fontSize: 14,
-    fontFamily: "Helvetica-Bold",
-    color: "#22d3ee",
-    marginBottom: 6,
-  },
-  title: {
-    fontSize: 16,
-    fontFamily: "Helvetica-Bold",
-    color: "#ffffff",
-    marginBottom: 4,
-  },
-  meta: {
-    fontSize: 9,
-    color: "#d1d5db",
-  },
-  section: {
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontFamily: "Helvetica-Bold",
-    color: "#030712",
-    marginBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-    paddingBottom: 4,
-  },
-  summaryText: {
-    fontSize: 10,
-    lineHeight: 1.5,
-    color: "#374151",
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 4,
-    padding: 8,
-    marginBottom: 6,
-  },
-  rowMain: {
-    flex: 1,
-    paddingRight: 8,
-  },
-  point: {
-    fontSize: 10,
-    fontFamily: "Helvetica-Bold",
-    marginBottom: 2,
-  },
-  result: {
-    fontSize: 9,
-    color: "#4b5563",
-    marginBottom: 2,
-  },
-  evidence: {
-    fontSize: 8,
-    color: "#6b7280",
-    marginBottom: 2,
-  },
-  recommendation: {
-    fontSize: 8,
-    color: "#4b5563",
-    fontFamily: "Helvetica-Oblique",
-  },
-  badge: {
-    fontSize: 8,
-    fontFamily: "Helvetica-Bold",
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 3,
-  },
-  footer: {
-    position: "absolute",
-    bottom: 20,
-    left: 40,
-    right: 40,
-    fontSize: 7,
-    color: "#9ca3af",
-    textAlign: "center",
-  },
-})
+  redesPerfilPublico: "si" | "no" | "mixto"
+  redesFotosSensibles: "si" | "no" | "a_veces"
+  redesMuestraTrabajo: "si" | "no"
+  redesGeolocalizacion: "si" | "no" | "no_se"
 
-export function ScanReportDocument({ target, summary, findings, generatedAt }: ScanReportInput) {
-  return (
-    <Document>
-      <Page size="A4" style={styles.page} wrap>
-        <View style={styles.header} fixed>
-          <Text style={styles.brand}>AgenticSec</Text>
-          <Text style={styles.title}>Reporte de Auditoría de Seguridad</Text>
-          <Text style={styles.meta}>Target: {target}</Text>
-          <Text style={styles.meta}>
-            Generado: {generatedAt.toLocaleString("es-AR", { dateStyle: "long", timeStyle: "short" })}
-          </Text>
-        </View>
+  dispositivosBloqueo: "todos" | "algunos" | "ninguno"
+  dispositivosCifrado: "si" | "no" | "no_se"
+  dispositivosActualizados: "si" | "no" | "no_se"
+  dispositivosAntivirus: "si" | "no" | "no_aplica"
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Resumen Ejecutivo</Text>
-          <Text style={styles.summaryText}>{summary}</Text>
-        </View>
+  redRouterProtocolo: "wpa3" | "wpa2" | "wep_o_abierta" | "no_se"
+  redPasswordDefault: "si" | "no" | "no_se"
+  redWpsDesactivado: "si" | "no" | "no_se"
+  redIotSeparada: "si" | "no" | "no_tiene_iot"
 
-        {findings.map((cat) => (
-          <View key={cat.category} style={styles.section} wrap={false}>
-            <Text style={styles.sectionTitle}>{cat.category}</Text>
-            {cat.points.map((p, idx) => (
-              <View key={idx} style={styles.row}>
-                <View style={styles.rowMain}>
-                  <Text style={styles.point}>{p.point}</Text>
-                  <Text style={styles.result}>Resultado: {p.result}</Text>
-                  <Text style={styles.evidence}>{p.evidence}</Text>
-                  <Text style={styles.recommendation}>{p.recommendation}</Text>
-                </View>
-                <Text
-                  style={[
-                    styles.badge,
-                    {
-                      backgroundColor: ESTADO_COLORS[p.estado].background,
-                      color: ESTADO_COLORS[p.estado].color,
-                    },
-                  ]}
-                >
-                  {p.estado}
-                </Text>
-              </View>
-            ))}
-          </View>
-        ))}
-
-        <Text
-          style={styles.footer}
-          fixed
-          render={({ pageNumber, totalPages }) =>
-            `Página ${pageNumber} de ${totalPages} · Este reporte fue generado automáticamente por un agente de IA como apoyo informativo y no reemplaza una auditoría de seguridad profesional completa.`
-          }
-        />
-      </Page>
-    </Document>
-  )
-}
-
-export async function renderScanReportPdf(input: ScanReportInput): Promise<Buffer> {
-  return renderToBuffer(<ScanReportDocument {...input} />)
+  ingSocialFechaNacimiento: "si" | "no"
+  ingSocialPreguntasSeguridad: "si" | "no" | "no_se"
+  ingSocialDatosFamiliares: "si" | "no"
+  ingSocialContactosDesconocidos: "si" | "no" | "a_veces"
 }
 ```
 
-- [ ] **Step 5: Correr el test para confirmar que pasa**
+- [ ] **Step 2: Agregar el modelo Prisma**
 
-Run: `npx vitest run src/lib/agents/scan/report-pdf.test.ts`
-Expected: PASS (1 test).
+En `prisma/schema.prisma`, actualizar el comentario de `Agent.type` (línea 55):
 
-- [ ] **Step 6: Commit**
+```prisma
+  type            String   // "chat" | "form" | "link" | "scan" | "assessment"
+```
+
+Y agregar, después del modelo `SecurityScanRun`:
+
+```prisma
+
+model PersonalAssessmentRun {
+  id        String   @id @default(cuid())
+  agentId   String
+  userEmail String
+  answers   Json
+  status    String   @default("running") // "running" | "completed" | "failed"
+  findings  Json?
+  summary   String?
+  riskScore Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([agentId])
+  @@index([userEmail])
+  @@index([createdAt])
+}
+```
+
+- [ ] **Step 3: Regenerar el cliente de Prisma**
+
+Run: `npx prisma generate`
+Expected: termina sin errores; `@prisma/client` ahora expone `prisma.personalAssessmentRun`. **No** correr `prisma db push` ni `prisma migrate` localmente (el `DATABASE_URL` local es SQLite, el schema es PostgreSQL — ver Global Constraints).
+
+- [ ] **Step 4: Verificar tipos**
+
+Run: `npx tsc --noEmit -p tsconfig.json`
+Expected: sin errores.
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add package.json package-lock.json src/lib/agents/scan/report-pdf.tsx src/lib/agents/scan/report-pdf.test.ts
-git commit -m "feat: add server-side PDF generator for security scan reports"
+git add src/lib/agents/types.ts prisma/schema.prisma
+git commit -m "feat: add AssessmentAnswers type and PersonalAssessmentRun model"
 ```
 
 ---

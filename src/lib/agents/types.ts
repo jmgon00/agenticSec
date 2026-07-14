@@ -5,7 +5,7 @@ export interface Agent {
   description: string
   fullDescription: string
   category: "educativo" | "productivo"
-  type: "chat" | "form" | "link" | "scan"
+  type: "chat" | "form" | "link" | "scan" | "assessment"
   icon: string
   instructions?: string
   inputFormat?: Record<string, unknown>
@@ -67,4 +67,41 @@ export interface ScanPoint {
 export interface CategoryCheckResult {
   category: string
   points: ScanPoint[]
+}
+
+export interface AssessmentAnswers {
+  identidadBuscasteNombre: "si" | "no"
+  identidadDatosIndexados: "si" | "no" | "no_se"
+  identidadPerfilesViejos: "si" | "no" | "no_se"
+  identidadUsuarioRepetido: "si" | "no"
+
+  cuentasMfaEmail: "si" | "no"
+  cuentasMfaRedes: "si" | "no" | "parcial"
+  cuentasCantidad: "menos_20" | "20_80" | "mas_80" | "no_se"
+  cuentasRevisoTerceros: "si" | "no"
+
+  passwordsGestor: "si" | "no"
+  passwordsReutiliza: "si" | "no" | "no_se"
+  passwordsLargas: "si" | "no" | "no_se"
+  passwordsCambioEmail: "si" | "no" | "no_se"
+
+  redesPerfilPublico: "si" | "no" | "mixto"
+  redesFotosSensibles: "si" | "no" | "a_veces"
+  redesMuestraTrabajo: "si" | "no"
+  redesGeolocalizacion: "si" | "no" | "no_se"
+
+  dispositivosBloqueo: "todos" | "algunos" | "ninguno"
+  dispositivosCifrado: "si" | "no" | "no_se"
+  dispositivosActualizados: "si" | "no" | "no_se"
+  dispositivosAntivirus: "si" | "no" | "no_aplica"
+
+  redRouterProtocolo: "wpa3" | "wpa2" | "wep_o_abierta" | "no_se"
+  redPasswordDefault: "si" | "no" | "no_se"
+  redWpsDesactivado: "si" | "no" | "no_se"
+  redIotSeparada: "si" | "no" | "no_tiene_iot"
+
+  ingSocialFechaNacimiento: "si" | "no"
+  ingSocialPreguntasSeguridad: "si" | "no" | "no_se"
+  ingSocialDatosFamiliares: "si" | "no"
+  ingSocialContactosDesconocidos: "si" | "no" | "a_veces"
 }

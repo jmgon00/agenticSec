@@ -52,7 +52,7 @@ model Agent {
   description     String   // One-line description for gallery
   fullDescription String   // Longer description for detail page
   category        String   // "educativo" | "productivo"
-  type            String   // "chat" | "form" | "link" | "scan"
+  type            String   // "chat" | "form" | "link" | "scan" | "assessment"
   icon            String   // Emoji: "🔍", "📚", etc
   instructions    String?  // System prompt for Claude (optional for type="link")
   inputFormat     Json?    // Form field schema if type="form"
@@ -100,6 +100,23 @@ model SecurityScanRun {
   summary      String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([agentId])
+  @@index([userEmail])
+  @@index([createdAt])
+}
+
+model PersonalAssessmentRun {
+  id        String   @id @default(cuid())
+  agentId   String
+  userEmail String
+  answers   Json
+  status    String   @default("running") // "running" | "completed" | "failed"
+  findings  Json?
+  summary   String?
+  riskScore Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([agentId])
   @@index([userEmail])

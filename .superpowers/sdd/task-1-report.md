@@ -1,79 +1,75 @@
-# Task 1 Report: PDF Generator (report-pdf.tsx)
+# Task 1 Report: Types and Prisma schema for Personal Security Assessment
 
-## Implementation Summary
+## What was implemented
 
-Successfully implemented a server-side PDF generator for security scan reports using `@react-pdf/renderer` (v4.5.1). The implementation provides a reusable, typed interface for converting security scan results into professional PDF documents.
+Successfully extended the Agent type system and Prisma schema to support a new "assessment" agent type:
 
-## Files Created
+1. **Modified `src/lib/agents/types.ts`:**
+   - Extended `Agent.type` union to include `"assessment"` alongside existing types ("chat", "form", "link", "scan")
+   - Added new `AssessmentAnswers` export interface with 28 fields organized across 7 security categories:
+     - Identidad (4 fields)
+     - Cuentas (4 fields)
+     - Passwords (4 fields)
+     - Redes Sociales (4 fields)
+     - Dispositivos (4 fields)
+     - Red WiFi (4 fields)
+     - Ingeniería Social (4 fields)
+   - Each field uses appropriate literal union types ("si"/"no", "no_se", etc.)
 
-1. **src/lib/agents/scan/report-pdf.tsx** - Server-side PDF generator component
-   - Exports `ScanReportInput` interface for input validation
-   - Exports `ScanReportDocument` React component rendering the PDF structure
-   - Exports `renderScanReportPdf()` async function that generates PDF buffer
-   - Includes comprehensive styling via `@react-pdf/renderer` StyleSheet API
-   - Formats findings with estado-based color coding (Aprobado, Fallido, Pendiente, No aplica)
+2. **Modified `prisma/schema.prisma`:**
+   - Updated `Agent.type` comment to include `"assessment"` in the list of valid types
+   - Added new `PersonalAssessmentRun` model with:
+     - id, agentId, userEmail (identification fields)
+     - answers (Json - stores AssessmentAnswers)
+     - status, findings, summary, riskScore (results and metadata)
+     - Indexes on agentId, userEmail, createdAt for efficient querying
 
-2. **src/lib/agents/scan/report-pdf.test.ts** - Test suite
-   - TDD test written first, confirming RED then GREEN states
-   - Single test validates PDF generation: magic bytes, buffer size constraints
+## Verification commands run
 
-## Files Modified
+### 1. `npx prisma generate`
+**Status:** ✓ PASSED
 
-- **package.json** - Added `@react-pdf/renderer@^4.5.1` dependency
-- **package-lock.json** - Updated lock file with new dependency and transitive packages (57 packages added)
-
-## Testing Evidence
-
-### RED State (Test fails before implementation)
+Output:
 ```
-Exit code 1
-FAIL  src/lib/agents/scan/report-pdf.test.ts
-Error: Cannot find module './report-pdf'
-```
-
-### GREEN State (Test passes after implementation)
-```
-Test Files  1 passed (1)
-Tests  1 passed (1)
-Duration  1.03s
+Prisma schema loaded from prisma\schema.prisma
+✔ Generated Prisma Client (v6.19.3) to .\node_modules\@prisma\client in 60ms
 ```
 
-### Full Suite Validation
-```
-Test Files  5 passed (5)
-Tests  35 passed (35)
-Duration  704ms
-```
+The Prisma client was successfully regenerated. The new `PersonalAssessmentRun` model is now exposed via the `@prisma/client` package.
 
-## Quality Checks
+### 2. `npx tsc --noEmit -p tsconfig.json`
+**Status:** ✓ PASSED
 
-### Style Compliance
-- No semicolons (matches existing codebase in `src/lib/agents/types.ts`, `src/lib/agents/scan/orchestrator.ts`)
-- Double quotes used throughout (matches project conventions)
-- Proper TypeScript typing with interfaces and type imports
+No output = no TypeScript errors. All type definitions are valid and properly integrated.
 
-### Implementation Completeness
-- ✓ Dependency installed correctly
-- ✓ Test file created with exact test from brief
-- ✓ Implementation file created with exact code from brief
-- ✓ All test assertions pass
-- ✓ No breaking changes to existing tests
-- ✓ Follows established project patterns
+## Files changed
 
-### Self-Review
-- No YAGNI violations - only implemented what was requested
-- Clear interfaces and exports for Task 2 integration
-- Proper error handling (async/await pattern)
-- Memory-efficient PDF generation (constraint: < 200KB)
+- `src/lib/agents/types.ts` - 44 lines added/1 line modified
+- `prisma/schema.prisma` - 15 lines added/1 line modified
 
-## Commit Created
+## Self-review findings
 
-- **SHA:** 4b46dee
-- **Message:** feat: add server-side PDF generator for security scan reports
-- **Files staged:** package.json, package-lock.json, src/lib/agents/scan/report-pdf.tsx, src/lib/agents/scan/report-pdf.test.ts
+**Completeness:** ✓ Both files edited exactly as specified in the brief.
+- Agent.type union extended correctly
+- AssessmentAnswers interface added with all 28 fields in correct order and types
+- Agent.type comment updated in schema
+- PersonalAssessmentRun model added with all required fields and indexes
 
-## Notes
+**Code quality:** ✓ Matches existing style
+- `types.ts`: No semicolons (consistent with existing interface definitions)
+- `schema.prisma`: Standard Prisma formatting with proper indentation and field alignment
+- Comment formats match existing patterns in both files
+- Field ordering logical (id, relationships, data, status, timestamps)
 
-- No concerns or issues identified
-- Ready for Task 2 (API route integration)
-- PDF structure is modular and extensible for future enhancements
+**Verification:** ✓ Both commands clean
+- prisma generate: No errors, client successfully regenerated
+- tsc: No type errors or warnings
+
+## Commit
+
+- **SHA:** 8110f6f
+- **Message:** "feat: add AssessmentAnswers type and PersonalAssessmentRun model"
+
+## Issues or concerns
+
+None. This is a pure foundational task with no runtime logic to test — the changes are type/schema additions only, verified by prisma generate and TypeScript compilation.

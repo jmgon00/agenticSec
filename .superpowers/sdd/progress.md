@@ -8,7 +8,7 @@
 
 ## Tasks Status
 
-- [ ] Task 1: Types + Prisma schema
+- [x] Task 1: Types + Prisma schema — implemented (8110f6f), review clean
 - [ ] Task 2: Scoring engine
 - [ ] Task 3: Questions metadata
 - [ ] Task 4: Orchestrator

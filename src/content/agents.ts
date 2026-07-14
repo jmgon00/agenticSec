@@ -77,7 +77,7 @@ Sé Socrático - haz preguntas guía.`,
     category: "productivo",
     type: "link",
     icon: "💼",
-    externalUrl: "https://agent-job.com",
+    externalUrl: "https://agent-job-five.vercel.app/",
     features: [
       "Carga Excel → optimización automática",
       "Integración con 4 portales principales",

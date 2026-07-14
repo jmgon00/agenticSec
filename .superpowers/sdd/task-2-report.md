@@ -1,118 +1,127 @@
-# Task 2 Implementation Report
+# Task 2: Deterministic Scoring Engine — Report
 
 ## Summary
-Successfully implemented the `POST /api/agents/[agent-id]/scan/report` endpoint for generating PDF security scan reports. The implementation includes full validation with Zod schemas, proper error handling, and comprehensive test coverage.
+
+Implemented a 100% deterministic scoring engine for the Personal Security Assessment agent feature. Two files created and committed, all 12 tests passing, full test suite clean (49 tests total, 0 regressions).
 
 ## What Was Implemented
 
-### 1. Test File: `src/app/api/agents/[agent-id]/scan/report/route.test.ts`
-- Created comprehensive test suite with two test cases:
-  - **Test 1:** "returns a PDF for a valid payload" — validates successful PDF generation with correct headers and content
-  - **Test 2:** "returns 400 for a payload missing findings" — validates error handling for invalid input
-- Uses Vitest framework with proper NextRequest mocking
-- Tests verify PDF magic bytes (%PDF signature) to confirm actual PDF output
+1. **`src/lib/agents/assessment/scoring.test.ts`** (164 lines)
+   - 12 unit tests covering all edge cases
+   - Tests for all 7 categories, estado mapping, severity levels
+   - Edge cases: "No aplica", "Pendiente" (no_se/parcial/a_veces), best/worst case scenarios
+   - `computeRiskScore` tests: 100 (all Aprobado), 0 (all Fallido), exclusion of "No aplica", Pendiente weighting (0.5)
 
-### 2. Implementation File: `src/app/api/agents/[agent-id]/scan/report/route.ts`
-- **Zod Schemas:** Three schemas for hierarchical validation:
-  - `scanPointSchema`: Validates individual security check points (point, result, severity, evidence, recommendation, estado)
-  - `categoryCheckResultSchema`: Validates category with array of points
-  - `reportRequestSchema`: Validates complete request (target, summary, findings array with min 1 item)
+2. **`src/lib/agents/assessment/scoring.ts`** (258 lines)
+   - Pure, deterministic functions (no I/O, no randomness)
+   - `scoreAssessment(answers: AssessmentAnswers): CategoryCheckResult[]` — maps 28 answers to 7 categories × 4 points each = 28 ScanPoints
+   - `computeRiskScore(findings: CategoryCheckResult[]): number` — weighted score (Aprobado=1, Pendiente=0.5, Fallido=0, excluding "No aplica")
+   - Seven category-scoring functions (scoreIdentidadDigital, scoreCuentasAutenticacion, scoreContrasenas, scoreRedesSociales, scoreDispositivos, scoreRedDomestica, scoreIngenieriaSocial)
+   - All 28 rules transcribed exactly as per brief spec
 
-- **POST Handler:** Exports `async function POST(request: NextRequest)`
-  - Safely parses JSON request body with fallback to null
-  - Validates against `reportRequestSchema` using `safeParse`
-  - Returns 400 with JSON error for invalid payload
-  - Generates PDF using `renderScanReportPdf` from Task 1
-  - Creates sanitized filename from target URL and current date
-  - Returns 200 with PDF buffer and proper headers:
-    - `Content-Type: application/pdf`
-    - `Content-Disposition: attachment; filename="..."`
-  - Returns 500 with JSON error for any unexpected exceptions
+## TDD Evidence
 
-- **Filename Sanitization:** `sanitizeFilenamePart` function removes protocol and replaces unsafe characters
-
-## Testing Results
-
-### TDD Evidence
-
-#### RED Phase
-```bash
-$ npx vitest run src/app/api/agents/[agent-id]/scan/report/route.test.ts
-
-FAIL  src/app/api/agents/[agent-id]/scan/report/route.test.ts
-Error: Cannot find module './route'
+### RED (Test Fails)
 ```
-Test correctly failed because implementation didn't exist yet.
+Command: npx vitest run src/lib/agents/assessment/scoring.test.ts
 
-#### GREEN Phase
-```bash
-$ npx vitest run src/app/api/agents/[agent-id]/scan/report/route.test.ts
+Output:
+ FAIL  src/lib/agents/assessment/scoring.test.ts
+Error: Cannot find module './scoring' imported from E:/Cloude projects/interactiv3Web/src/lib/agents/assessment/scoring.test.ts
 
-Test Files  1 passed (1)
-     Tests  2 passed (2)
+Test Files  1 failed (1)
+Tests       no tests
 ```
-Both tests pass after implementation.
 
-### Full Test Suite
-```bash
-$ npm test
+Expected failure — module doesn't exist yet.
 
-Test Files  6 passed (6)
-     Tests  37 passed (37)
+### GREEN (Test Passes)
 ```
-- 35 existing tests: all passing
-- 2 new tests (Task 2): all passing
-- Total: 37 tests passing with 0 failures
+Command: npx vitest run src/lib/agents/assessment/scoring.test.ts
+
+Output:
+ RUN  v4.1.10 E:/Cloude projects/interactiv3Web
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  15:59:36
+   Duration  302ms (transform 38ms, setup 0ms, import 53ms, tests 5ms, environment 0ms)
+```
+
+All 12 tests passing on first run of implementation.
+
+## Full Test Suite Result
+
+```
+ RUN  v4.1.10 E:/Cloude projects/interactiv3Web
+
+ Test Files  7 passed (7)
+      Tests  49 passed (49)
+   Start at  15:59:44
+   Duration  816ms (transform 394ms, setup 0ms, import 1.19s, tests 288ms, environment 1ms)
+```
+
+**Status:** Clean — 0 regressions. All 49 tests across all 7 test files passing.
 
 ## Files Changed
 
-1. **Created:** `src/app/api/agents/[agent-id]/scan/report/route.test.ts` (62 lines)
-   - Test suite for the API endpoint
+- **Created:** `src/lib/agents/assessment/scoring.ts` (258 lines)
+- **Created:** `src/lib/agents/assessment/scoring.test.ts` (164 lines)
 
-2. **Created:** `src/app/api/agents/[agent-id]/scan/report/route.ts` (62 lines)
-   - API route implementation with validation and PDF generation
+Total: 422 insertions.
 
-## Code Quality Checks
+## Commit
 
-✅ **Style Compliance:**
-- No semicolons (matches project convention)
-- Double quotes for strings (matches project convention)
-- Proper TypeScript typing with types imported from @/lib/agents/types
+```
+2b3e1d4 feat: add deterministic scoring engine for personal security assessment
+```
 
-✅ **Error Handling:**
-- Graceful JSON parsing with fallback
-- Validation-aware error messages
-- Try-catch wrapping with console error logging
-- Proper HTTP status codes (200, 400, 500)
-
-✅ **Integration:**
-- Correctly imports and uses renderScanReportPdf from Task 1
-- Properly types CategoryCheckResult from @/lib/agents/types
-- Uses Zod for validation (already installed)
-- Uses Next.js NextRequest/Response APIs correctly
-
-✅ **Tests:**
-- Covers happy path (valid payload → 200 PDF)
-- Covers error path (invalid payload → 400 JSON error)
-- Validates PDF output structure (checks magic bytes)
-- Validates response headers are correct
+Subject: "feat: add deterministic scoring engine for personal security assessment"
 
 ## Self-Review Findings
 
-✅ **Completeness:** All requirements from brief implemented exactly as specified
-✅ **TDD Followed:** Tests written first, failed correctly, implementation completed, tests passed
-✅ **No Overbuilding:** Implementation strictly follows brief specifications, no extra features
-✅ **Test Quality:** Tests verify actual behavior (PDF generation, header validation, error handling)
-✅ **Full Suite Passing:** All 37 tests pass with no regressions
-✅ **Git Commit:** Created with correct message and commit SHA 1bf77f3
+### Completeness
+- All 28 answer fields mapped to 7 categories (4 points per category)
+- Every rule in the brief transcribed exactly:
+  - Estado values: "Aprobado", "Fallido", "Pendiente", "No aplica" — all present
+  - Severity values: "OK", "Alto", "Medio", "Bajo", "N/A" — all correct
+  - Recommendation/evidence text matches brief exactly
+- Edge cases covered: "no_se", "parcial", "a_veces" → "Pendiente"; "no_aplica" → "No aplica"
 
-## Issues and Concerns
+### Quality
+- Code style: no semicolons, double quotes (matches codebase)
+- Pure functions: no I/O, no external dependencies beyond types
+- DRY: helper `point()` function avoids repetition
+- Type safety: all params/returns fully typed
+- Immutable: functions don't mutate inputs
 
-None. Implementation is complete, tested, and ready for production.
+### Test Output
+```
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+```
 
-## Commit Information
+All 12 tests passing:
+1. returns exactly 7 categories
+2. marks every point as Aprobado for best-case (excluding No aplica)
+3. marks MFA de email as Fallido/Alto when disabled
+4. marks reutilización as Fallido/Alto
+5. marks router WEP/abierta as Fallido/Alto
+6. marks antivirus as No aplica when appropriate
+7. marks IoT as No aplica when no_tiene_iot
+8. marks no_se/parcial/a_veces as Pendiente
+9. computeRiskScore returns 100 for all Aprobado
+10. computeRiskScore returns 0 for all Fallido
+11. computeRiskScore excludes No aplica from denominator
+12. computeRiskScore weighs Pendiente as 0.5
 
-- **Commit SHA:** 1bf77f3
-- **Subject:** feat: add POST endpoint to generate the security scan PDF report
-- **Files Changed:** 2 files created (route.ts + route.test.ts)
-- **Lines Added:** 122 lines total
+No warnings. No skipped tests. All output clean.
+
+## Issues or Concerns
+
+None. Implementation complete and verified.
+
+---
+
+Status: DONE
+Date: 2026-07-14

@@ -1,74 +1,118 @@
-# Task 2 Report: Hide the Global Footer on Home Only
+# Task 2 Implementation Report
 
-## Status
-**DONE**
+## Summary
+Successfully implemented the `POST /api/agents/[agent-id]/scan/report` endpoint for generating PDF security scan reports. The implementation includes full validation with Zod schemas, proper error handling, and comprehensive test coverage.
 
-## Implementation Summary
+## What Was Implemented
 
-### Files Created
-- **`src/components/sections/ConditionalFooter.tsx`** (new file)
-  - Client component that conditionally renders Footer
-  - Uses `usePathname()` from `next/navigation` to check current route
-  - Returns `null` when pathname is "/" (home page)
-  - Returns `<Footer />` for all other routes
+### 1. Test File: `src/app/api/agents/[agent-id]/scan/report/route.test.ts`
+- Created comprehensive test suite with two test cases:
+  - **Test 1:** "returns a PDF for a valid payload" — validates successful PDF generation with correct headers and content
+  - **Test 2:** "returns 400 for a payload missing findings" — validates error handling for invalid input
+- Uses Vitest framework with proper NextRequest mocking
+- Tests verify PDF magic bytes (%PDF signature) to confirm actual PDF output
 
-### Files Modified
-- **`src/app/layout.tsx`**
-  - Changed import from `Footer` to `ConditionalFooter` (line 5)
-  - Updated JSX body to use `<ConditionalFooter />` instead of `<Footer />` (line 41)
+### 2. Implementation File: `src/app/api/agents/[agent-id]/scan/report/route.ts`
+- **Zod Schemas:** Three schemas for hierarchical validation:
+  - `scanPointSchema`: Validates individual security check points (point, result, severity, evidence, recommendation, estado)
+  - `categoryCheckResultSchema`: Validates category with array of points
+  - `reportRequestSchema`: Validates complete request (target, summary, findings array with min 1 item)
 
-## Verification Results
+- **POST Handler:** Exports `async function POST(request: NextRequest)`
+  - Safely parses JSON request body with fallback to null
+  - Validates against `reportRequestSchema` using `safeParse`
+  - Returns 400 with JSON error for invalid payload
+  - Generates PDF using `renderScanReportPdf` from Task 1
+  - Creates sanitized filename from target URL and current date
+  - Returns 200 with PDF buffer and proper headers:
+    - `Content-Type: application/pdf`
+    - `Content-Disposition: attachment; filename="..."`
+  - Returns 500 with JSON error for any unexpected exceptions
 
-### TypeScript Compilation
+- **Filename Sanitization:** `sanitizeFilenamePart` function removes protocol and replaces unsafe characters
+
+## Testing Results
+
+### TDD Evidence
+
+#### RED Phase
 ```bash
-$ npx tsc --noEmit
-```
-**Result:** No output (success ✓)
+$ npx vitest run src/app/api/agents/[agent-id]/scan/report/route.test.ts
 
-### Manual Verification with curl
+FAIL  src/app/api/agents/[agent-id]/scan/report/route.test.ts
+Error: Cannot find module './route'
+```
+Test correctly failed because implementation didn't exist yet.
+
+#### GREEN Phase
 ```bash
-$ curl -s http://localhost:3000/ | grep -c "footer"
-0
+$ npx vitest run src/app/api/agents/[agent-id]/scan/report/route.test.ts
 
-$ curl -s http://localhost:3000/portfolio | grep -c "footer"
-1
+Test Files  1 passed (1)
+     Tests  2 passed (2)
 ```
+Both tests pass after implementation.
 
-**Result:** 
-- Home page (`/`): 0 footer matches ✓
-- Portfolio page (`/portfolio`): 1 footer match ✓
-- Confirms footer is hidden on home only ✓
+### Full Test Suite
+```bash
+$ npm test
 
-## Code Quality Check
+Test Files  6 passed (6)
+     Tests  37 passed (37)
+```
+- 35 existing tests: all passing
+- 2 new tests (Task 2): all passing
+- Total: 37 tests passing with 0 failures
 
-### ConditionalFooter.tsx compliance
-- ✓ Matches brief exactly
-- ✓ Has `"use client"` directive (required for usePathname)
-- ✓ Named export `ConditionalFooter`
-- ✓ No props
-- ✓ Imports Footer from `./Footer`
+## Files Changed
 
-### layout.tsx compliance
-- ✓ Import line changed correctly
-- ✓ JSX swap completed
-- ✓ No other changes in file
-- ✓ Scoped modification only
+1. **Created:** `src/app/api/agents/[agent-id]/scan/report/route.test.ts` (62 lines)
+   - Test suite for the API endpoint
 
-## Commits Created
-- **f8037ef** - `feat: hide global footer on home only`
-  - Added `src/components/sections/ConditionalFooter.tsx`
-  - Modified `src/app/layout.tsx`
+2. **Created:** `src/app/api/agents/[agent-id]/scan/report/route.ts` (62 lines)
+   - API route implementation with validation and PDF generation
+
+## Code Quality Checks
+
+✅ **Style Compliance:**
+- No semicolons (matches project convention)
+- Double quotes for strings (matches project convention)
+- Proper TypeScript typing with types imported from @/lib/agents/types
+
+✅ **Error Handling:**
+- Graceful JSON parsing with fallback
+- Validation-aware error messages
+- Try-catch wrapping with console error logging
+- Proper HTTP status codes (200, 400, 500)
+
+✅ **Integration:**
+- Correctly imports and uses renderScanReportPdf from Task 1
+- Properly types CategoryCheckResult from @/lib/agents/types
+- Uses Zod for validation (already installed)
+- Uses Next.js NextRequest/Response APIs correctly
+
+✅ **Tests:**
+- Covers happy path (valid payload → 200 PDF)
+- Covers error path (invalid payload → 400 JSON error)
+- Validates PDF output structure (checks magic bytes)
+- Validates response headers are correct
 
 ## Self-Review Findings
-- ✓ ConditionalFooter.tsx matches brief exactly
-- ✓ layout.tsx changes are scoped correctly
-- ✓ TypeScript compilation successful
-- ✓ Manual curl verification passed both routes
-- ✓ Commit follows required format
-- ✓ No concerns or issues
 
-## Notes
-- The implementation is clean and minimal
-- No modifications to existing Footer component (as required)
-- Client-side conditional rendering avoids server-side complexity
-- Footer is fully hidden on home page (0 matches) and present on other routes
+✅ **Completeness:** All requirements from brief implemented exactly as specified
+✅ **TDD Followed:** Tests written first, failed correctly, implementation completed, tests passed
+✅ **No Overbuilding:** Implementation strictly follows brief specifications, no extra features
+✅ **Test Quality:** Tests verify actual behavior (PDF generation, header validation, error handling)
+✅ **Full Suite Passing:** All 37 tests pass with no regressions
+✅ **Git Commit:** Created with correct message and commit SHA 1bf77f3
+
+## Issues and Concerns
+
+None. Implementation is complete, tested, and ready for production.
+
+## Commit Information
+
+- **Commit SHA:** 1bf77f3
+- **Subject:** feat: add POST endpoint to generate the security scan PDF report
+- **Files Changed:** 2 files created (route.ts + route.test.ts)
+- **Lines Added:** 122 lines total

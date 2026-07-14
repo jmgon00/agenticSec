@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get("category") // "educativo" | "productivo" | "all"
     const search = searchParams.get("search") // optional substring search
 
-    let where: Record<string, unknown> = {}
+    let where: Record<string, unknown> = { active: true }
 
     // Filter by category
     if (category && category !== "all") {

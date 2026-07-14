@@ -13,6 +13,7 @@ export interface Agent {
   temperature?: number
   externalUrl?: string
   features?: string[]
+  active?: boolean
   createdAt: Date
   updatedAt: Date
 }

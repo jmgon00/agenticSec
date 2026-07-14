@@ -19,6 +19,7 @@ const SEED_AGENTS = [
 Sé educativo pero directo. Usa ejemplos prácticos.`,
     maxTokens: 1500,
     temperature: 0.7,
+    active: false,
   },
   {
     name: "Generador de Reportes de Seguridad",
@@ -48,6 +49,7 @@ Sé educativo pero directo. Usa ejemplos prácticos.`,
     },
     maxTokens: 2000,
     temperature: 0.5,
+    active: false,
   },
   {
     name: "Asistente de Aprendizaje de XSS",
@@ -67,6 +69,7 @@ Sé educativo pero directo. Usa ejemplos prácticos.`,
 Sé Socrático - haz preguntas guía.`,
     maxTokens: 1200,
     temperature: 0.8,
+    active: false,
   },
   {
     name: "Agent Job",

@@ -59,7 +59,7 @@ export async function POST(
       where: { id: agentId },
     })
 
-    if (!agent) {
+    if (!agent || !agent.active) {
       return NextResponse.json(
         { success: false, error: "Agent not found" },
         { status: 404 }

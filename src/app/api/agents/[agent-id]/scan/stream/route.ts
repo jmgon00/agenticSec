@@ -45,7 +45,7 @@ export async function POST(
     const agent = await prisma.agent.findFirst({
       where: { OR: [{ id: agentId }, { slug: agentId }] },
     })
-    if (!agent || agent.type !== "scan") {
+    if (!agent || !agent.active || agent.type !== "scan") {
       return new Response(JSON.stringify({ error: "Agente no encontrado" }), {
         status: 404,
         headers: { "Content-Type": "application/json" },

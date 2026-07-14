@@ -1,126 +1,269 @@
-## Task 1: Collapse Header to a hamburger-only nav with a slide-in `MobileMenu`
+### Task 1: Generador de PDF (`report-pdf.tsx`)
 
 **Files:**
-- Create: `src/components/sections/MobileMenu.tsx`
-- Modify: `src/components/sections/Header.tsx` (full rewrite of the component body)
+- Create: `src/lib/agents/scan/report-pdf.tsx`
+- Test: `src/lib/agents/scan/report-pdf.test.ts`
 
 **Interfaces:**
-- Produces: `MobileMenu` component with props `{ links: { href: string; label: string }[]; open: boolean; onClose: () => void }`, named export `MobileMenu`.
-- Consumes: none (this task has no dependency on other tasks).
+- Consumes: `CategoryCheckResult`, `ScanEstado` desde `@/lib/agents/types` (ya existen, sin cambios).
+- Produces: `export interface ScanReportInput { target: string; summary: string; findings: CategoryCheckResult[]; generatedAt: Date }` y `export async function renderScanReportPdf(input: ScanReportInput): Promise<Buffer>` — usado por Task 2.
 
-- [ ] **Step 1: Create `MobileMenu.tsx`**
+- [ ] **Step 1: Instalar la dependencia**
+
+Run: `npm install @react-pdf/renderer@^4.5.1`
+Expected: `package.json` y `package-lock.json` quedan modificados con la nueva dependencia.
+
+- [ ] **Step 2: Escribir el test (falla porque el archivo no existe todavía)**
+
+Crear `src/lib/agents/scan/report-pdf.test.ts`:
+
+```ts
+import { describe, it, expect } from "vitest"
+import { renderScanReportPdf } from "./report-pdf"
+import type { CategoryCheckResult } from "@/lib/agents/types"
+
+const sampleFindings: CategoryCheckResult[] = [
+  {
+    category: "Headers HTTP",
+    points: [
+      {
+        point: "Content-Security-Policy configurado",
+        result: "Presente",
+        severity: "OK",
+        evidence: "content-security-policy: default-src 'self'",
+        recommendation: "Ninguna acción requerida.",
+        estado: "Aprobado",
+      },
+      {
+        point: "Strict-Transport-Security configurado",
+        result: "Ausente",
+        severity: "Alto",
+        evidence: "Header no encontrado en la respuesta",
+        recommendation: "Agregar el header Strict-Transport-Security.",
+        estado: "Fallido",
+      },
+    ],
+  },
+]
+
+describe("renderScanReportPdf", () => {
+  it("generates a valid, lightweight PDF buffer", async () => {
+    const buffer = await renderScanReportPdf({
+      target: "https://ejemplo.com",
+      summary: "Resumen ejecutivo de prueba.",
+      findings: sampleFindings,
+      generatedAt: new Date("2026-07-14T12:00:00Z"),
+    })
+
+    expect(buffer.subarray(0, 4).toString("ascii")).toBe("%PDF")
+    expect(buffer.length).toBeGreaterThan(0)
+    expect(buffer.length).toBeLessThan(200_000)
+  })
+})
+```
+
+- [ ] **Step 3: Correr el test para confirmar que falla**
+
+Run: `npx vitest run src/lib/agents/scan/report-pdf.test.ts`
+Expected: FAIL — `Cannot find module './report-pdf'` (el archivo todavía no existe).
+
+- [ ] **Step 4: Crear el generador de PDF**
+
+Crear `src/lib/agents/scan/report-pdf.tsx`:
 
 ```tsx
-"use client";
+import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer"
+import type { CategoryCheckResult, ScanEstado } from "@/lib/agents/types"
 
-import Link from "next/link";
-
-interface MobileMenuLink {
-  href: string;
-  label: string;
+export interface ScanReportInput {
+  target: string
+  summary: string
+  findings: CategoryCheckResult[]
+  generatedAt: Date
 }
 
-interface MobileMenuProps {
-  links: MobileMenuLink[];
-  open: boolean;
-  onClose: () => void;
+const ESTADO_COLORS: Record<ScanEstado, { background: string; color: string }> = {
+  Aprobado: { background: "#22c55e", color: "#ffffff" },
+  Fallido: { background: "#ef4444", color: "#ffffff" },
+  Pendiente: { background: "#eab308", color: "#1f2937" },
+  "No aplica": { background: "#6b7280", color: "#ffffff" },
 }
 
-export const MobileMenu = ({ links, open, onClose }: MobileMenuProps) => {
-  if (!open) return null;
+const styles = StyleSheet.create({
+  page: {
+    paddingTop: 100,
+    paddingBottom: 60,
+    paddingHorizontal: 40,
+    fontSize: 10,
+    fontFamily: "Helvetica",
+    color: "#1f2937",
+  },
+  header: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#030712",
+    paddingHorizontal: 40,
+    paddingVertical: 20,
+  },
+  brand: {
+    fontSize: 14,
+    fontFamily: "Helvetica-Bold",
+    color: "#22d3ee",
+    marginBottom: 6,
+  },
+  title: {
+    fontSize: 16,
+    fontFamily: "Helvetica-Bold",
+    color: "#ffffff",
+    marginBottom: 4,
+  },
+  meta: {
+    fontSize: 9,
+    color: "#d1d5db",
+  },
+  section: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontFamily: "Helvetica-Bold",
+    color: "#030712",
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    paddingBottom: 4,
+  },
+  summaryText: {
+    fontSize: 10,
+    lineHeight: 1.5,
+    color: "#374151",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 4,
+    padding: 8,
+    marginBottom: 6,
+  },
+  rowMain: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  point: {
+    fontSize: 10,
+    fontFamily: "Helvetica-Bold",
+    marginBottom: 2,
+  },
+  result: {
+    fontSize: 9,
+    color: "#4b5563",
+    marginBottom: 2,
+  },
+  evidence: {
+    fontSize: 8,
+    color: "#6b7280",
+    marginBottom: 2,
+  },
+  recommendation: {
+    fontSize: 8,
+    color: "#4b5563",
+    fontFamily: "Helvetica-Oblique",
+  },
+  badge: {
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold",
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 3,
+  },
+  footer: {
+    position: "absolute",
+    bottom: 20,
+    left: 40,
+    right: 40,
+    fontSize: 7,
+    color: "#9ca3af",
+    textAlign: "center",
+  },
+})
 
+export function ScanReportDocument({ target, summary, findings, generatedAt }: ScanReportInput) {
   return (
-    <div className="fixed inset-0 z-50">
-      <div
-        className="absolute inset-0 bg-black/60"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <nav className="absolute top-0 right-0 h-full w-64 bg-gray-950 border-l border-gray-800 flex flex-col p-6 gap-2">
-        <button
-          type="button"
-          aria-label="Cerrar menú"
-          className="self-end text-white hover:text-cyan-400 mb-4 text-2xl leading-none transition-colors duration-200"
-          onClick={onClose}
-        >
-          ×
-        </button>
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="text-gray-300 hover:text-cyan-400 px-2 py-3 rounded transition-colors duration-200 text-lg"
-            onClick={onClose}
-          >
-            {link.label}
-          </Link>
+    <Document>
+      <Page size="A4" style={styles.page} wrap>
+        <View style={styles.header} fixed>
+          <Text style={styles.brand}>AgenticSec</Text>
+          <Text style={styles.title}>Reporte de Auditoría de Seguridad</Text>
+          <Text style={styles.meta}>Target: {target}</Text>
+          <Text style={styles.meta}>
+            Generado: {generatedAt.toLocaleString("es-AR", { dateStyle: "long", timeStyle: "short" })}
+          </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Resumen Ejecutivo</Text>
+          <Text style={styles.summaryText}>{summary}</Text>
+        </View>
+
+        {findings.map((cat) => (
+          <View key={cat.category} style={styles.section} wrap={false}>
+            <Text style={styles.sectionTitle}>{cat.category}</Text>
+            {cat.points.map((p, idx) => (
+              <View key={idx} style={styles.row}>
+                <View style={styles.rowMain}>
+                  <Text style={styles.point}>{p.point}</Text>
+                  <Text style={styles.result}>Resultado: {p.result}</Text>
+                  <Text style={styles.evidence}>{p.evidence}</Text>
+                  <Text style={styles.recommendation}>{p.recommendation}</Text>
+                </View>
+                <Text
+                  style={[
+                    styles.badge,
+                    {
+                      backgroundColor: ESTADO_COLORS[p.estado].background,
+                      color: ESTADO_COLORS[p.estado].color,
+                    },
+                  ]}
+                >
+                  {p.estado}
+                </Text>
+              </View>
+            ))}
+          </View>
         ))}
-      </nav>
-    </div>
-  );
-};
+
+        <Text
+          style={styles.footer}
+          fixed
+          render={({ pageNumber, totalPages }) =>
+            `Página ${pageNumber} de ${totalPages} · Este reporte fue generado automáticamente por un agente de IA como apoyo informativo y no reemplaza una auditoría de seguridad profesional completa.`
+          }
+        />
+      </Page>
+    </Document>
+  )
+}
+
+export async function renderScanReportPdf(input: ScanReportInput): Promise<Buffer> {
+  return renderToBuffer(<ScanReportDocument {...input} />)
+}
 ```
 
-- [ ] **Step 2: Rewrite `Header.tsx` to drop the inline desktop/mobile nav lists and use `MobileMenu`**
+- [ ] **Step 5: Correr el test para confirmar que pasa**
 
-Replace the entire file content with:
+Run: `npx vitest run src/lib/agents/scan/report-pdf.test.ts`
+Expected: PASS (1 test).
 
-```tsx
-"use client";
-
-import Link from "next/link";
-import { useState } from "react";
-import { MobileMenu } from "./MobileMenu";
-
-const navLinks = [
-  { href: "/", label: "Inicio" },
-  { href: "/portfolio", label: "Portfolio" },
-  { href: "/presupuesto", label: "Presupuesto" },
-  { href: "/agentes", label: "Agentes 🤖" },
-  { href: "/agentic-ia", label: "Agentic IA" },
-  { href: "/security-services", label: "Servicios de Seguridad" },
-];
-
-export const Header = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-gray-950 border-b border-gray-800 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/" className="text-white hover:text-cyan-400 font-bold text-xl transition-colors duration-200">
-            AgenticSec
-          </Link>
-
-          <button
-            type="button"
-            aria-label="Abrir menú"
-            className="text-white hover:text-cyan-400 transition-colors duration-200"
-            onClick={() => setMenuOpen(true)}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <MobileMenu links={navLinks} open={menuOpen} onClose={() => setMenuOpen(false)} />
-    </header>
-  );
-};
-```
-
-- [ ] **Step 3: Verify with TypeScript**
-
-Run: `npx tsc --noEmit`
-Expected: no output (clean, same as before this task).
-
-- [ ] **Step 4: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/components/sections/MobileMenu.tsx src/components/sections/Header.tsx
-git commit -m "feat: collapse header nav to a hamburger + slide-in menu on all pages"
+git add package.json package-lock.json src/lib/agents/scan/report-pdf.tsx src/lib/agents/scan/report-pdf.test.ts
+git commit -m "feat: add server-side PDF generator for security scan reports"
 ```
 
 ---

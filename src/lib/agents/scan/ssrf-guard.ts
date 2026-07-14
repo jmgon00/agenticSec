@@ -89,7 +89,8 @@ export async function safeFetch(
 ): Promise<Response> {
   let current = rawUrl
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-    await assertSafeTarget(current) // re-validate this hop's host/IP before following it
+    const validated = await assertSafeTarget(current) // re-validate this hop's host/IP before following it
+    current = validated.url // use the normalized URL for the actual request
 
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)

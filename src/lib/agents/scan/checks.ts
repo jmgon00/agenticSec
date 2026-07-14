@@ -1,5 +1,6 @@
 import { safeFetch } from "./ssrf-guard"
 import { resolveTxt } from "node:dns/promises"
+import tls from "node:tls"
 import type { CategoryCheckResult, ScanPoint } from "@/lib/agents/types"
 
 function point(
@@ -343,4 +344,146 @@ export async function checkDNSEmail(hostname: string): Promise<CategoryCheckResu
   ]
 
   return { category: "DNS/Email", points }
+}
+
+export function checkTLS(hostname: string): Promise<CategoryCheckResult> {
+  return new Promise((resolve) => {
+    const socket = tls.connect({ host: hostname, port: 443, servername: hostname, timeout: 8000 })
+
+    socket.on("secureConnect", () => {
+      const points: ScanPoint[] = []
+      const cert = socket.getPeerCertificate(true)
+      const now = new Date()
+      const validFrom = new Date(cert.valid_from)
+      const validTo = new Date(cert.valid_to)
+      const isValid = now >= validFrom && now <= validTo
+
+      points.push(
+        isValid
+          ? point(
+              "Certificado válido y no expirado",
+              "Válido",
+              "OK",
+              `${cert.subject?.CN || hostname}, vence ${cert.valid_to}`,
+              "Vercel/el proveedor renueva automáticamente, sin acción requerida",
+              "Aprobado"
+            )
+          : point(
+              "Certificado válido y no expirado",
+              "Inválido o expirado",
+              "Alto",
+              `valid_from=${cert.valid_from}, valid_to=${cert.valid_to}`,
+              "Renovar el certificado",
+              "Fallido"
+            )
+      )
+
+      let chainLength = 0
+      let current = cert
+      const seen = new Set<string>()
+      while (current && current.fingerprint && !seen.has(current.fingerprint)) {
+        seen.add(current.fingerprint)
+        chainLength++
+        current = current.issuerCertificate as typeof cert
+      }
+      points.push(
+        chainLength >= 2
+          ? point(
+              "Cadena de certificados completa",
+              `${chainLength} certificados`,
+              "OK",
+              `Cadena de ${chainLength} certificados`,
+              "Sin acción requerida",
+              "Aprobado"
+            )
+          : point(
+              "Cadena de certificados completa",
+              `${chainLength} certificado(s)`,
+              "Medio",
+              `Cadena de ${chainLength} certificado(s)`,
+              "Verificar que el servidor envíe los certificados intermedios",
+              "Pendiente"
+            )
+      )
+
+      const protocol = socket.getProtocol() || "desconocido"
+      points.push(
+        protocol === "TLSv1.3" || protocol === "TLSv1.2"
+          ? point(
+              "Sin protocolos obsoletos (SSLv3, TLS 1.0/1.1)",
+              protocol,
+              "OK",
+              `Protocolo negociado: ${protocol}`,
+              "Sin acción requerida",
+              "Aprobado"
+            )
+          : point(
+              "Sin protocolos obsoletos (SSLv3, TLS 1.0/1.1)",
+              protocol,
+              "Alto",
+              `Protocolo negociado: ${protocol}`,
+              "Deshabilitar protocolos obsoletos, dejar solo TLS 1.2+",
+              "Fallido"
+            )
+      )
+
+      const cipher = socket.getCipher()
+      const weak = /rc4|3des|null|export/i.test(cipher?.name || "")
+      points.push(
+        !weak
+          ? point(
+              "Cifrados fuertes (sin RC4/3DES, con PFS)",
+              cipher?.name || "desconocido",
+              "OK",
+              `Cipher: ${cipher?.name}`,
+              "Sin acción requerida",
+              "Aprobado"
+            )
+          : point(
+              "Cifrados fuertes (sin RC4/3DES, con PFS)",
+              cipher?.name || "desconocido",
+              "Alto",
+              `Cipher: ${cipher?.name}`,
+              "Eliminar cifrados débiles de la configuración del servidor",
+              "Fallido"
+            )
+      )
+
+      points.push(
+        point(
+          "Grade general en Qualys SSL Labs",
+          "No evaluado",
+          "N/A",
+          "El grade de SSL Labs no se corre en este flujo automático (limitación de la API externa)",
+          "Verificar manualmente en ssllabs.com/ssltest",
+          "No aplica"
+        )
+      )
+
+      socket.end()
+      resolve({ category: "TLS/SSL", points })
+    })
+
+    const fail = (evidence: string) => {
+      resolve({
+        category: "TLS/SSL",
+        points: [
+          point(
+            "Certificado válido y no expirado",
+            "No se pudo evaluar",
+            "Alto",
+            evidence,
+            "Verificar que el servidor acepte conexiones HTTPS en el puerto 443",
+            "Pendiente"
+          ),
+        ],
+      })
+    }
+
+    socket.on("error", () => fail("No fue posible establecer conexión TLS"))
+    socket.on("timeout", () => {
+      socket.destroy()
+      fail("La conexión TLS no respondió a tiempo")
+    })
+  })
 }

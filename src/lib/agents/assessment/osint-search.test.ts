@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { mergeOsintFindings } from "./osint-search"
+import { mergeOsintFindings, redactSensitiveValues } from "./osint-search"
 import type { CategoryCheckResult, ScanPoint } from "@/lib/agents/types"
 
 function fakePoint(point: string): ScanPoint {
@@ -73,5 +73,49 @@ describe("mergeOsintFindings", () => {
     expect(merged).toHaveLength(2)
     const cuentas = merged.find((c) => c.category === "Cuentas y Autenticación")!
     expect(cuentas).toBe(baseFindings[1])
+  })
+})
+
+describe("redactSensitiveValues", () => {
+  const findingsWithLeakedPII: CategoryCheckResult[] = [
+    {
+      category: "Identidad Digital",
+      points: [
+        {
+          point: "Datos personales sensibles (teléfono/DNI/dirección) indexados",
+          result: "Se encontró el teléfono 1122334455 indexado",
+          severity: "Alto",
+          evidence: "El DNI 30111222 aparece en un sitio público junto a Juan Pérez",
+          recommendation: "Pedí la desindexación de 1122334455 y 30111222",
+          estado: "Fallido",
+        },
+      ],
+    },
+  ]
+
+  it("redacts every literal occurrence of the provided sensitive values across all text fields", () => {
+    const redacted = redactSensitiveValues(findingsWithLeakedPII, [
+      "Juan Pérez",
+      "1122334455",
+      "30111222",
+    ])
+    const point = redacted[0].points[0]
+
+    expect(point.result).not.toContain("1122334455")
+    expect(point.evidence).not.toContain("30111222")
+    expect(point.evidence).not.toContain("Juan Pérez")
+    expect(point.recommendation).not.toContain("1122334455")
+    expect(point.recommendation).not.toContain("30111222")
+    expect(point.result).toContain("[dato redactado]")
+  })
+
+  it("returns the findings unchanged when no sensitive values are provided", () => {
+    const redacted = redactSensitiveValues(findingsWithLeakedPII, [undefined, undefined, undefined])
+    expect(redacted).toBe(findingsWithLeakedPII)
+  })
+
+  it("ignores empty/whitespace-only values without throwing", () => {
+    const redacted = redactSensitiveValues(findingsWithLeakedPII, ["", "   ", undefined])
+    expect(redacted).toBe(findingsWithLeakedPII)
   })
 })

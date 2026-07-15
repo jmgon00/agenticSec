@@ -49,6 +49,36 @@ export function mergeOsintFindings(
   })
 }
 
+/**
+ * Defense-in-depth: strips any literal, exact-match occurrence of the
+ * provided sensitive values (name/phone/DNI) from findings text fields,
+ * on top of the prompt-level instruction in runOsintSearch. Guards against
+ * the model echoing raw PII into evidence/result/recommendation despite
+ * being told not to, before findings are persisted or summarized.
+ */
+export function redactSensitiveValues(
+  findings: CategoryCheckResult[],
+  sensitiveValues: (string | undefined)[]
+): CategoryCheckResult[] {
+  const needles = sensitiveValues.filter(
+    (v): v is string => typeof v === "string" && v.trim().length > 0
+  )
+  if (needles.length === 0) return findings
+
+  const redact = (text: string): string =>
+    needles.reduce((acc, needle) => acc.split(needle).join("[dato redactado]"), text)
+
+  return findings.map((category) => ({
+    ...category,
+    points: category.points.map((p) => ({
+      ...p,
+      result: redact(p.result),
+      evidence: redact(p.evidence),
+      recommendation: redact(p.recommendation),
+    })),
+  }))
+}
+
 export async function runOsintSearch(input: OsintSearchInput): Promise<ScanPoint[]> {
   const model = process.env.SCAN_AGENT_MODEL || "claude-sonnet-5"
 

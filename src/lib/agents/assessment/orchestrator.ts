@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk"
 import { scoreAssessment, computeRiskScore } from "./scoring"
-import { runOsintSearch, mergeOsintFindings, type OsintSearchInput } from "./osint-search"
+import { runOsintSearch, mergeOsintFindings, redactSensitiveValues, type OsintSearchInput } from "./osint-search"
 import type { AssessmentAnswers, CategoryCheckResult } from "@/lib/agents/types"
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -20,6 +20,11 @@ export async function runPersonalAssessment(
   if (osintInput) {
     const osintPoints = await runOsintSearch(osintInput)
     findings = mergeOsintFindings(findings, osintPoints)
+    findings = redactSensitiveValues(findings, [
+      osintInput.nombreCompleto,
+      osintInput.telefono,
+      osintInput.dni,
+    ])
   }
 
   const riskScore = computeRiskScore(findings)

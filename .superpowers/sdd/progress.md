@@ -8,7 +8,7 @@
 
 ## Tasks Status
 
-- [ ] Task 1: OSINT search engine (osint-search.ts)
+- [x] Task 1: OSINT search engine (osint-search.ts) — implemented (7541274), review clean (splice logic + privacy instruction + json_schema shape verified)
 - [ ] Task 2: Wire into orchestrator
 - [ ] Task 3: Endpoint validation + non-persistence
 - [ ] Task 4: UI optional section + manual verification

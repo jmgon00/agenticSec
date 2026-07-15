@@ -27,6 +27,10 @@ export const AgentAssessmentRunner = ({ agent, userEmail }: AgentAssessmentRunne
   const [findings, setFindings] = useState<CategoryCheckResult[] | null>(null)
   const [summary, setSummary] = useState("")
   const [riskScore, setRiskScore] = useState<number | null>(null)
+  const [osintNombre, setOsintNombre] = useState("")
+  const [osintTelefono, setOsintTelefono] = useState("")
+  const [osintDni, setOsintDni] = useState("")
+  const [osintConsent, setOsintConsent] = useState(false)
 
   const allAnswered = Object.values(answers).every((v) => v !== "")
 
@@ -41,10 +45,20 @@ export const AgentAssessmentRunner = ({ agent, userEmail }: AgentAssessmentRunne
     setError("")
     setRunning(true)
     try {
+      const osintSearch =
+        osintConsent && osintNombre.trim()
+          ? {
+              nombreCompleto: osintNombre.trim(),
+              telefono: osintTelefono.trim() || undefined,
+              dni: osintDni.trim() || undefined,
+              consent: true as const,
+            }
+          : undefined
+
       const response = await fetch(`/api/agents/${agent.id}/assessment/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers, userEmail }),
+        body: JSON.stringify({ answers, userEmail, osintSearch }),
       })
       const data = await response.json()
       if (!response.ok) {
@@ -67,6 +81,10 @@ export const AgentAssessmentRunner = ({ agent, userEmail }: AgentAssessmentRunne
     setFindings(null)
     setSummary("")
     setRiskScore(null)
+    setOsintNombre("")
+    setOsintTelefono("")
+    setOsintDni("")
+    setOsintConsent(false)
   }
 
   return (
@@ -106,6 +124,58 @@ export const AgentAssessmentRunner = ({ agent, userEmail }: AgentAssessmentRunne
                   </div>
                 ))}
               </div>
+
+              {cat.key === "identidad" && (
+                <div className="mt-6 p-4 border border-cyan-400/30 bg-cyan-400/5 rounded-lg space-y-3">
+                  <div>
+                    <div className="text-sm font-semibold text-cyan-300">
+                      Opcional: dejá que busquemos tu exposición pública por vos
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Completá tu nombre (y opcionalmente teléfono/DNI) para que un agente de IA busque
+                      en internet qué información pública existe sobre vos, en vez de que lo hagas manualmente.
+                    </p>
+                  </div>
+                  <input
+                    type="text"
+                    value={osintNombre}
+                    onChange={(e) => setOsintNombre(e.target.value)}
+                    placeholder="Nombre completo"
+                    disabled={running}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-cyan-400 disabled:opacity-50"
+                  />
+                  <input
+                    type="text"
+                    value={osintTelefono}
+                    onChange={(e) => setOsintTelefono(e.target.value)}
+                    placeholder="Teléfono (opcional)"
+                    disabled={running}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-cyan-400 disabled:opacity-50"
+                  />
+                  <input
+                    type="text"
+                    value={osintDni}
+                    onChange={(e) => setOsintDni(e.target.value)}
+                    placeholder="DNI (opcional)"
+                    disabled={running}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-cyan-400 disabled:opacity-50"
+                  />
+                  <label className="flex items-start gap-3 text-xs text-gray-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={osintConsent}
+                      onChange={(e) => setOsintConsent(e.target.checked)}
+                      disabled={running}
+                      className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-600 bg-gray-800 text-cyan-500 focus:ring-cyan-500"
+                    />
+                    <span>
+                      Confirmo que estos son mis propios datos, autorizo la búsqueda pública en internet, y
+                      entiendo que se envían a un servicio de búsqueda de terceros para generar el resultado.
+                      No se guardan mi nombre, teléfono ni DNI.
+                    </span>
+                  </label>
+                </div>
+              )}
             </div>
           ))}
 

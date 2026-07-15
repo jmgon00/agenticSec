@@ -125,4 +125,65 @@ describe("POST /api/agents/[agent-id]/assessment/run", () => {
 
     expect(response.status).toBe(404)
   })
+
+  it("passes osintSearch to the orchestrator but never persists it", async () => {
+    vi.mocked(prisma.personalAssessmentRun.count).mockResolvedValue(0)
+    vi.mocked(prisma.agent.findFirst).mockResolvedValue({
+      id: "agent-1",
+      active: true,
+      type: "assessment",
+    } as any)
+    vi.mocked(prisma.personalAssessmentRun.create).mockResolvedValue({ id: "run-1" } as any)
+    vi.mocked(prisma.personalAssessmentRun.update).mockResolvedValue({} as any)
+    vi.mocked(runPersonalAssessment).mockResolvedValue({
+      findings: [{ category: "Identidad Digital", points: [] }],
+      summary: "Resumen con búsqueda.",
+      riskScore: 90,
+    })
+
+    const osintSearch = {
+      nombreCompleto: "Juan Pérez",
+      telefono: "1122334455",
+      dni: "30111222",
+      consent: true as const,
+    }
+
+    const response = await POST(
+      buildRequest({ userEmail: "user@test.com", answers: validAnswers, osintSearch }),
+      buildParams()
+    )
+
+    expect(response.status).toBe(200)
+
+    // runPersonalAssessment recibió el osintSearch tal cual
+    expect(runPersonalAssessment).toHaveBeenCalledWith(
+      validAnswers,
+      expect.objectContaining({ nombreCompleto: "Juan Pérez" })
+    )
+
+    // pero nada de eso llegó a Prisma: ni en el create ni en el update
+    const createCallArgs = vi.mocked(prisma.personalAssessmentRun.create).mock.calls[0][0]
+    const createSerialized = JSON.stringify(createCallArgs)
+    expect(createSerialized).not.toContain("Juan Pérez")
+    expect(createSerialized).not.toContain("1122334455")
+    expect(createSerialized).not.toContain("30111222")
+
+    const updateCallArgs = vi.mocked(prisma.personalAssessmentRun.update).mock.calls[0][0]
+    const updateSerialized = JSON.stringify(updateCallArgs)
+    expect(updateSerialized).not.toContain("Juan Pérez")
+    expect(updateSerialized).not.toContain("1122334455")
+    expect(updateSerialized).not.toContain("30111222")
+  })
+
+  it("rejects osintSearch without explicit consent", async () => {
+    const response = await POST(
+      buildRequest({
+        userEmail: "user@test.com",
+        answers: validAnswers,
+        osintSearch: { nombreCompleto: "Juan Pérez", consent: false },
+      }),
+      buildParams()
+    )
+    expect(response.status).toBe(400)
+  })
 })

@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db"
 import { runPersonalAssessment } from "@/lib/agents/assessment/orchestrator"
 import type { Prisma } from "@prisma/client"
 
+export const maxDuration = 120
+
 const ASSESSMENT_RATE_LIMIT_MAX = 10
 const ASSESSMENT_RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000
 
@@ -47,9 +49,17 @@ const answersSchema = z.object({
   ingSocialContactosDesconocidos: z.enum(["si", "no", "a_veces"]),
 })
 
+const osintSearchSchema = z.object({
+  nombreCompleto: z.string().min(1).max(200),
+  telefono: z.string().max(50).optional(),
+  dni: z.string().max(50).optional(),
+  consent: z.literal(true),
+})
+
 const requestSchema = z.object({
   userEmail: z.string().min(1),
   answers: answersSchema,
+  osintSearch: osintSearchSchema.optional(),
 })
 
 export async function POST(
@@ -66,7 +76,7 @@ export async function POST(
         headers: { "Content-Type": "application/json" },
       })
     }
-    const { userEmail, answers } = parsed.data
+    const { userEmail, answers, osintSearch } = parsed.data
 
     const runCount = await prisma.personalAssessmentRun.count({
       where: {
@@ -101,7 +111,13 @@ export async function POST(
     })
 
     try {
-      const outcome = await runPersonalAssessment(answers)
+      const outcome = osintSearch
+        ? await runPersonalAssessment(answers, {
+            nombreCompleto: osintSearch.nombreCompleto,
+            telefono: osintSearch.telefono,
+            dni: osintSearch.dni,
+          })
+        : await runPersonalAssessment(answers)
 
       await prisma.personalAssessmentRun.update({
         where: { id: run.id },

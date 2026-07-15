@@ -9,32 +9,34 @@ export interface OsintSearchInput {
   dni?: string
 }
 
+const SCAN_POINT_SCHEMA = {
+  type: "object",
+  properties: {
+    point: { type: "string" },
+    result: { type: "string" },
+    severity: { type: "string" },
+    evidence: { type: "string" },
+    recommendation: { type: "string" },
+    estado: {
+      type: "string",
+      enum: ["Aprobado", "Fallido", "Pendiente", "No aplica"],
+    },
+  },
+  required: ["point", "result", "severity", "evidence", "recommendation", "estado"],
+  additionalProperties: false,
+} as const
+
+// Anthropic's structured-output schema validator rejects array `minItems`/`maxItems`
+// values other than 0 or 1, so "exactly 3 points" can't be expressed as an array bound.
+// Three fixed named properties (each required) achieve the same guarantee instead.
 const OUTPUT_SCHEMA = {
   type: "object",
   properties: {
-    points: {
-      type: "array",
-      minItems: 3,
-      maxItems: 3,
-      items: {
-        type: "object",
-        properties: {
-          point: { type: "string" },
-          result: { type: "string" },
-          severity: { type: "string" },
-          evidence: { type: "string" },
-          recommendation: { type: "string" },
-          estado: {
-            type: "string",
-            enum: ["Aprobado", "Fallido", "Pendiente", "No aplica"],
-          },
-        },
-        required: ["point", "result", "severity", "evidence", "recommendation", "estado"],
-        additionalProperties: false,
-      },
-    },
+    revisasteInformacion: SCAN_POINT_SCHEMA,
+    datosSensibles: SCAN_POINT_SCHEMA,
+    perfilesAbandonados: SCAN_POINT_SCHEMA,
   },
-  required: ["points"],
+  required: ["revisasteInformacion", "datosSensibles", "perfilesAbandonados"],
   additionalProperties: false,
 } as const
 
@@ -108,10 +110,10 @@ export async function runOsintSearch(input: OsintSearchInput): Promise<ScanPoint
     .map((b) => b.text)
     .join("\n\n")
 
-  const structureSystemPrompt = `Tenés los hallazgos de una búsqueda de exposición pública sobre una persona. Tu tarea es traducir esos hallazgos a exactamente 3 puntos de control, en este orden fijo:
-1. "Revisaste qué información pública existe sobre vos" — dado que la búsqueda ya se hizo automáticamente, marcá esto como "Aprobado" salvo que la búsqueda haya fallado por completo.
-2. "Datos personales sensibles (teléfono/DNI/dirección) indexados" — "Fallido" si se encontró el teléfono, DNI o dirección indexados públicamente; "Aprobado" si no se encontró nada; "Pendiente" si la búsqueda fue inconclusa.
-3. "Perfiles abandonados que siguen activos/públicos" — "Fallido" si se detectaron perfiles viejos/abandonados públicos; "Aprobado" si no se detectó ninguno; "Pendiente" si fue inconcluso.
+  const structureSystemPrompt = `Tenés los hallazgos de una búsqueda de exposición pública sobre una persona. Tu tarea es traducir esos hallazgos a exactamente 3 puntos de control, uno por cada uno de estos campos:
+- "revisasteInformacion" → point: "Revisaste qué información pública existe sobre vos" — dado que la búsqueda ya se hizo automáticamente, marcá esto como "Aprobado" salvo que la búsqueda haya fallado por completo.
+- "datosSensibles" → point: "Datos personales sensibles (teléfono/DNI/dirección) indexados" — "Fallido" si se encontró el teléfono, DNI o dirección indexados públicamente; "Aprobado" si no se encontró nada; "Pendiente" si la búsqueda fue inconclusa.
+- "perfilesAbandonados" → point: "Perfiles abandonados que siguen activos/públicos" — "Fallido" si se detectaron perfiles viejos/abandonados públicos; "Aprobado" si no se detectó ninguno; "Pendiente" si fue inconcluso.
 
 IMPORTANTE: en el campo "evidence" de cada punto, describí el hallazgo en términos generales — NUNCA repitas textualmente el teléfono, DNI o dirección encontrados. Por ejemplo, escribí "se encontró tu dirección publicada en un sitio público" en vez de citar la dirección real.`
 
@@ -133,6 +135,10 @@ IMPORTANTE: en el campo "evidence" de cada punto, describí el hallazgo en térm
     throw new Error("No se pudo estructurar el resultado de la búsqueda")
   }
 
-  const parsed = JSON.parse(textBlock.text) as { points: ScanPoint[] }
-  return parsed.points
+  const parsed = JSON.parse(textBlock.text) as {
+    revisasteInformacion: ScanPoint
+    datosSensibles: ScanPoint
+    perfilesAbandonados: ScanPoint
+  }
+  return [parsed.revisasteInformacion, parsed.datosSensibles, parsed.perfilesAbandonados]
 }

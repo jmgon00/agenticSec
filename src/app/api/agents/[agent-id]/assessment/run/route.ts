@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db"
 import { runPersonalAssessment } from "@/lib/agents/assessment/orchestrator"
 import type { Prisma } from "@prisma/client"
 
-export const maxDuration = 120
+export const maxDuration = 300
 
 const ASSESSMENT_RATE_LIMIT_MAX = 10
 const ASSESSMENT_RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000

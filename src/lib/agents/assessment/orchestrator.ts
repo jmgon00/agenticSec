@@ -16,15 +16,20 @@ export async function runPersonalAssessment(
   osintInput?: OsintSearchInput
 ): Promise<AssessmentOutcome> {
   let findings = scoreAssessment(answers)
+  let osintUnavailable = false
 
   if (osintInput) {
     const osintPoints = await runOsintSearch(osintInput)
-    findings = mergeOsintFindings(findings, osintPoints)
-    findings = redactSensitiveValues(findings, [
-      osintInput.nombreCompleto,
-      osintInput.telefono,
-      osintInput.dni,
-    ])
+    if (osintPoints) {
+      findings = mergeOsintFindings(findings, osintPoints)
+      findings = redactSensitiveValues(findings, [
+        osintInput.nombreCompleto,
+        osintInput.telefono,
+        osintInput.dni,
+      ])
+    } else {
+      osintUnavailable = true
+    }
   }
 
   const riskScore = computeRiskScore(findings)
@@ -47,5 +52,9 @@ export async function runPersonalAssessment(
     throw new Error("El agente no devolvió un resumen")
   }
 
-  return { findings, summary: textBlock.text, riskScore }
+  const summary = osintUnavailable
+    ? `${textBlock.text}\n\n**Nota:** no pudimos completar la búsqueda automática de exposición pública esta vez (el servicio de búsqueda alcanzó un límite temporal). La sección de Identidad Digital usa tu autorreporte; podés reintentar la evaluación más tarde para obtener el resultado con búsqueda real.`
+    : textBlock.text
+
+  return { findings, summary, riskScore }
 }

@@ -81,7 +81,22 @@ export function redactSensitiveValues(
   }))
 }
 
-export async function runOsintSearch(input: OsintSearchInput): Promise<ScanPoint[]> {
+/**
+ * True when every web_search attempt in the response errored out (e.g. rate limit,
+ * max_uses exceeded) and none returned real results — i.e. the search tool produced
+ * nothing usable, as opposed to a normal response that just found little/nothing.
+ * Kept separate from runOsintSearch so this detection logic is unit-testable without
+ * a live API call.
+ */
+export function searchFailedCompletely(content: Anthropic.ContentBlock[]): boolean {
+  const resultBlocks = content.filter(
+    (b): b is Anthropic.WebSearchToolResultBlock => b.type === "web_search_tool_result"
+  )
+  const gotRealResults = resultBlocks.some((b) => Array.isArray(b.content))
+  return resultBlocks.length > 0 && !gotRealResults
+}
+
+export async function runOsintSearch(input: OsintSearchInput): Promise<ScanPoint[] | null> {
   const model = process.env.SCAN_AGENT_MODEL || "claude-sonnet-5"
 
   const dataLines = [
@@ -104,6 +119,15 @@ export async function runOsintSearch(input: OsintSearchInput): Promise<ScanPoint
       { role: "user", content: `Investigá la exposición pública de esta persona:\n${dataLines}` },
     ],
   })
+
+  if (searchFailedCompletely(searchResponse.content)) {
+    const errorCodes = searchResponse.content
+      .filter((b): b is Anthropic.WebSearchToolResultBlock => b.type === "web_search_tool_result")
+      .map((b) => (Array.isArray(b.content) ? null : b.content.error_code))
+      .filter((code): code is Anthropic.WebSearchToolResultErrorCode => code !== null)
+    console.error("[runOsintSearch] web_search tool failed on every attempt:", errorCodes)
+    return null
+  }
 
   const searchFindings = searchResponse.content
     .filter((b): b is Anthropic.TextBlock => b.type === "text")

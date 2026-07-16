@@ -1,6 +1,39 @@
 import { describe, it, expect } from "vitest"
-import { mergeOsintFindings, redactSensitiveValues } from "./osint-search"
+import type Anthropic from "@anthropic-ai/sdk"
+import { mergeOsintFindings, redactSensitiveValues, searchFailedCompletely } from "./osint-search"
 import type { CategoryCheckResult, ScanPoint } from "@/lib/agents/types"
+
+function fakeErrorResultBlock(
+  error_code: Anthropic.WebSearchToolResultErrorCode
+): Anthropic.WebSearchToolResultBlock {
+  return {
+    type: "web_search_tool_result",
+    tool_use_id: "toolu_test",
+    caller: { type: "direct" },
+    content: { type: "web_search_tool_result_error", error_code },
+  }
+}
+
+function fakeSuccessResultBlock(): Anthropic.WebSearchToolResultBlock {
+  return {
+    type: "web_search_tool_result",
+    tool_use_id: "toolu_test",
+    caller: { type: "direct" },
+    content: [
+      {
+        type: "web_search_result",
+        title: "test",
+        url: "https://example.com",
+        encrypted_content: "test",
+        page_age: null,
+      },
+    ],
+  }
+}
+
+function fakeTextBlock(text: string): Anthropic.TextBlock {
+  return { type: "text", text, citations: [] }
+}
 
 function fakePoint(point: string): ScanPoint {
   return {
@@ -117,5 +150,29 @@ describe("redactSensitiveValues", () => {
   it("ignores empty/whitespace-only values without throwing", () => {
     const redacted = redactSensitiveValues(findingsWithLeakedPII, ["", "   ", undefined])
     expect(redacted).toBe(findingsWithLeakedPII)
+  })
+})
+
+describe("searchFailedCompletely", () => {
+  it("returns true when every web_search_tool_result block is an error", () => {
+    const content: Anthropic.ContentBlock[] = [
+      fakeTextBlock("intentando buscar..."),
+      fakeErrorResultBlock("too_many_requests"),
+      fakeErrorResultBlock("max_uses_exceeded"),
+    ]
+    expect(searchFailedCompletely(content)).toBe(true)
+  })
+
+  it("returns false when at least one web_search_tool_result block has real results", () => {
+    const content: Anthropic.ContentBlock[] = [
+      fakeErrorResultBlock("too_many_requests"),
+      fakeSuccessResultBlock(),
+    ]
+    expect(searchFailedCompletely(content)).toBe(false)
+  })
+
+  it("returns false when there are no web_search_tool_result blocks at all", () => {
+    const content: Anthropic.ContentBlock[] = [fakeTextBlock("no se usó la herramienta de búsqueda")]
+    expect(searchFailedCompletely(content)).toBe(false)
   })
 })

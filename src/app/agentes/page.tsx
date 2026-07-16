@@ -37,6 +37,13 @@ export default function AgentesPage() {
             Explora agentes inteligentes diseñados para educar y potenciar tu trabajo en seguridad.
             Desde tutoriales interactivos hasta herramientas de análisis profesional.
           </p>
+
+          {/* CTA Button */}
+          <Link href="/agents">
+            <Button size="lg" className="bg-gradient-to-r from-cyan-400 to-magenta-400 hover:from-cyan-300 hover:to-magenta-300">
+              Explorar Galería de Agentes 🤖
+            </Button>
+          </Link>
         </div>
 
         {/* Features Grid */}
@@ -215,13 +222,6 @@ export default function AgentesPage() {
 
         {/* Divider */}
         <div className="my-12 border-t border-gray-700"></div>
-
-        {/* CTA Button */}
-        <Link href="/agents">
-          <Button size="lg" className="bg-gradient-to-r from-cyan-400 to-magenta-400 hover:from-cyan-300 hover:to-magenta-300">
-            Explorar Galería de Agentes 🤖
-          </Button>
-        </Link>
 
         {/* Footer text */}
         <p className="mt-8 text-gray-500 text-sm">
